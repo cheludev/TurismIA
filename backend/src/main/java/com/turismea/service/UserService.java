@@ -4,6 +4,8 @@ import com.turismea.model.Moderator;
 import com.turismea.model.Role;
 import com.turismea.model.Tourist;
 import com.turismea.model.User;
+import com.turismea.repository.ModeratorRepository;
+import com.turismea.repository.TouristRepository;
 import com.turismea.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,18 +16,23 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TouristRepository touristRepository;
+    private final ModeratorRepository moderatorRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TouristRepository touristRepository, ModeratorRepository moderatorRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.touristRepository = touristRepository;
+        this.moderatorRepository = moderatorRepository;
     }
 
     public Tourist registerTourist(User user) {
         Tourist tourist = new Tourist();
         tourist.setUsername(user.getUsername());
         tourist.setPassword(user.getPassword());
-        tourist.setEmail(user.getEmail());
-        tourist.setRoutes(null);
+        tourist.setEmail(user.getEmail());;
+
+        touristRepository.save((tourist));
 
         return tourist;
     }
@@ -35,6 +42,8 @@ public class UserService {
         moderator.setUsername(user.getUsername());
         moderator.setPassword(user.getPassword());
         moderator.setEmail(user.getEmail());
+
+        moderatorRepository.save(moderator);
 
         return moderator;
     }
@@ -47,7 +56,7 @@ public class UserService {
     public User logIn(User user) {
         if(userRepository.existsUserByUsername(user.getUsername())
                 || userRepository.existsUserByEmail(user.getEmail())) {
-          return null; //Username change is mandatory due to is already register.
+          return null;
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -73,6 +82,11 @@ public class UserService {
     public boolean existEmail(String email) {
         return userRepository.existsUserByEmail(email);
     }
+
+    public boolean checkBothPassword(String password1, String password2){
+        return password1.equals(password2);
+    }
+
 
 
 }

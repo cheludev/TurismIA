@@ -13,6 +13,10 @@ public class Route {
     private String name;
     private String city;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RouteType type;
+
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private Tourist owner;
@@ -107,5 +111,9 @@ public class Route {
 
     public void setLocations(List<Location> locations) {
         this.locations = locations;
+    }
+
+    public void setType(RouteType type) {
+        this.type = type;
     }
 }

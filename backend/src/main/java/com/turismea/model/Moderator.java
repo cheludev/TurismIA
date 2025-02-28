@@ -12,7 +12,7 @@ public class Moderator extends User{
     @Column(nullable = false)
     private String province;
 
-    @ManyToOne
+    @OneToMany
     @JoinColumn(name = "city_id")
     private City city;
 

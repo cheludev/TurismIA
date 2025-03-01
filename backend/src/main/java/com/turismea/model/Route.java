@@ -3,6 +3,7 @@ package com.turismea.model;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class Route {
@@ -116,4 +117,6 @@ public class Route {
     public void setType(RouteType type) {
         this.type = type;
     }
+
+
 }

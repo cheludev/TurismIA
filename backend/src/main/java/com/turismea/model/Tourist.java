@@ -10,8 +10,8 @@ public class Tourist extends User{
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Route> savedRoutes;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Route> createdRoutes;
+    @OneToOne
+    private Promotion promotion;
 
     public Tourist() {
         super();
@@ -20,7 +20,5 @@ public class Tourist extends User{
     public List<Route> getSavedRoutes() { return savedRoutes; }
     public void setSavedRoutes(List<Route> routes) { this.savedRoutes = routes; }
 
-    public List<Route> getCreatedRoutes() { return createdRoutes; }
-    public void setCreatedRoutes(List<Route> createdRoutes) { this.createdRoutes = createdRoutes; }
 
 }

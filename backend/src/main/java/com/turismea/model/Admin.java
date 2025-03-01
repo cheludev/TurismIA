@@ -13,6 +13,9 @@ public class Admin extends User {
 
     @OneToMany(mappedBy = "assignedTo", fetch = FetchType.LAZY) //We mark it as LAZY to avoid performance problems.
     private List<Report> reportList;
+    @OneToMany //We mark it as LAZY to avoid performance problems.
+    private List<Tourist> appliedToModerator;
+
 
     // Default constructor
     public Admin() {}

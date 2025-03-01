@@ -1,8 +1,10 @@
 package com.turismea.service;
 
-import com.turismea.model.Route;
-import com.turismea.model.RouteType;
-import com.turismea.model.Tourist;
+import com.turismea.exception.NotTheOwnerOfRouteEception;
+import com.turismea.exception.RouteNotFoundException;
+import com.turismea.exception.UserNotFoundException;
+import com.turismea.model.*;
+import com.turismea.repository.AdminRepository;
 import com.turismea.repository.RouteRepository;
 import com.turismea.repository.TouristRepository;
 import org.springframework.stereotype.Service;
@@ -14,29 +16,25 @@ import java.util.Optional;
 public class TouristService {
 
     private final TouristRepository touristRepository;
+    private final AdminRepository adminRepository;
     private RouteRepository routeRepository;
 
 
-    public TouristService(TouristRepository touristRepository) {
+    public TouristService(TouristRepository touristRepository, AdminRepository adminRepository) {
         this.touristRepository = touristRepository;
+        this.adminRepository = adminRepository;
     }
 
     public List<Route> getSavedRoutes(Long touristId) {
-        return touristRepository.findById(touristId)
-                .map(Tourist::getSavedRoutes)
-                .orElse(null);
-    }
-
-    public List<Route> getCreatedRoutes(Long touristId) {
-        return touristRepository.findById(touristId) //Get the "optional" tourist, if it is not empty ->
-                .map(Tourist::getCreatedRoutes) //Then try to get its routes and return it, but if any of them are empty
-                .orElse(null); //Return null
+        Tourist tourist = touristRepository.findById(touristId)
+                .orElseThrow(() -> new UserNotFoundException(touristId));
+        return routeRepository.getRouteByOwner(tourist);
     }
 
 
-    public List<Route> saveRoute(Long id, Route route, RouteType type) { //Save both types of routes
-        Tourist tourist = touristRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tourist not found"));
+    public List<Route> saveRoute(Long touristId, Route route, RouteType type) { //Save both types of routes
+        Tourist tourist = touristRepository.findById(touristId)
+                .orElseThrow(() -> new UserNotFoundException(touristId));
 
         route.setOwner(tourist);
         route.setType(type);
@@ -45,8 +43,44 @@ public class TouristService {
         routeRepository.save(route);
         touristRepository.save(tourist);
 
-        return touristRepository.getSavedRoutes(id);
+        return routeRepository.getRouteByOwner(tourist);
     }
 
+    public Route editRoute(Long originalRouteId, Route newRoute, Long touristId) {
+        // Find the existing route by ID
+        Route OGRoute = routeRepository.findById(originalRouteId)
+                .orElseThrow(() -> new RouteNotFoundException(originalRouteId));
+
+        // Check if the touristId is the owner of the route
+        if (!OGRoute.getOwner().getId().equals(touristId)) {
+            throw new NotTheOwnerOfRouteEception();
+        }
+
+
+            // Update route properties
+            OGRoute.setName(newRoute.getName());
+            OGRoute.setCity(newRoute.getCity());
+            OGRoute.setOwner(newRoute.getOwner());
+            OGRoute.setRate(newRoute.getRate());
+            OGRoute.setLocations(newRoute.getLocations());
+            OGRoute.setDescription(newRoute.getDescription());
+
+            // Save the updated route
+            return routeRepository.save(OGRoute);
+    }
+
+
+    public boolean applyToModerator(Long touristId) {
+
+        Tourist tourist = touristRepository.findById(touristId)
+                .orElseThrow(() -> new UserNotFoundException(touristId));
+
+        if(!tourist.getRole().equals(Role.MODERATOR)) {
+            Promotion promotion = new Promotion(tourist);
+            adminRepository.getReportList(tourist.getId()).add(promotion);
+            return adminRepository.getReportList(tourist.getId()).contains(promotion);
+        }
+        return false;
+    }
 
 }

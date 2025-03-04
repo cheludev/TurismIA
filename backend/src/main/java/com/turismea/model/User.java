@@ -2,6 +2,10 @@ package com.turismea.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User {
@@ -9,6 +13,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String firstName;
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -18,6 +25,9 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Request> request = new ArrayList<>();
 
     @Lob
     @Column
@@ -46,9 +56,32 @@ public class User {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public Role getRole() { return role; }
+    public byte[] getPhoto() {
+        return photo;
+    }
+    public String getFirstName() {
+        return firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public List<Request> getRequest() {
+        return request;
+    }
 
+    public void setRequest(List<Request> request) {
+        this.request = request;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
     public void setUsername(String username) { this.username = username; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setRole(Role role) { this.role = role; }
+    public void setPhoto(byte[] photo) {this.photo = photo;}
+
 }

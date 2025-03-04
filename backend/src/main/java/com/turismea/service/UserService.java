@@ -16,41 +16,10 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TouristRepository touristRepository;
-    private final ModeratorRepository moderatorRepository;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TouristRepository touristRepository, ModeratorRepository moderatorRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.touristRepository = touristRepository;
-        this.moderatorRepository = moderatorRepository;
-    }
-
-    public Tourist registerTourist(User user) {
-        Tourist tourist = new Tourist();
-        tourist.setUsername(user.getUsername());
-        tourist.setPassword(user.getPassword());
-        tourist.setEmail(user.getEmail());;
-
-        touristRepository.save((tourist));
-
-        return tourist;
-    }
-
-    public Moderator registerModerator(User user) {
-        Moderator moderator = new Moderator();
-        moderator.setUsername(user.getUsername());
-        moderator.setPassword(user.getPassword());
-        moderator.setEmail(user.getEmail());
-
-        moderatorRepository.save(moderator);
-
-        return moderator;
-    }
-
-    public Role getRoleFromUser(Long id) {
-        User user = userRepository.findById(id).orElse(null);
-        return user == null? null : user.getRole();
     }
 
     public User logIn(User user) {
@@ -86,7 +55,5 @@ public class UserService {
     public boolean checkBothPassword(String password1, String password2){
         return password1.equals(password2);
     }
-
-
 
 }

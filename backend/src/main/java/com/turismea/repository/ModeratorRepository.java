@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 
 public interface ModeratorRepository extends JpaRepository<Moderator, Long> {
+    void removeModeratorById(Long id);
 }

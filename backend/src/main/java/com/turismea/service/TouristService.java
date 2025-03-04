@@ -25,50 +25,16 @@ public class TouristService {
         this.adminRepository = adminRepository;
     }
 
-    public List<Route> getSavedRoutes(Long touristId) {
-        Tourist tourist = touristRepository.findById(touristId)
-                .orElseThrow(() -> new UserNotFoundException(touristId));
-        return routeRepository.getRouteByOwner(tourist);
+    public Tourist registerTourist(User user) {
+        Tourist tourist = new Tourist();
+        tourist.setUsername(user.getUsername());
+        tourist.setPassword(user.getPassword());
+        tourist.setEmail(user.getEmail());;
+
+        touristRepository.save((tourist));
+
+        return tourist;
     }
-
-
-    public List<Route> saveRoute(Long touristId, Route route, RouteType type) { //Save both types of routes
-        Tourist tourist = touristRepository.findById(touristId)
-                .orElseThrow(() -> new UserNotFoundException(touristId));
-
-        route.setOwner(tourist);
-        route.setType(type);
-        tourist.getSavedRoutes().add(route);
-
-        routeRepository.save(route);
-        touristRepository.save(tourist);
-
-        return routeRepository.getRouteByOwner(tourist);
-    }
-
-    public Route editRoute(Long originalRouteId, Route newRoute, Long touristId) {
-        // Find the existing route by ID
-        Route OGRoute = routeRepository.findById(originalRouteId)
-                .orElseThrow(() -> new RouteNotFoundException(originalRouteId));
-
-        // Check if the touristId is the owner of the route
-        if (!OGRoute.getOwner().getId().equals(touristId)) {
-            throw new NotTheOwnerOfRouteEception();
-        }
-
-
-            // Update route properties
-            OGRoute.setName(newRoute.getName());
-            OGRoute.setCity(newRoute.getCity());
-            OGRoute.setOwner(newRoute.getOwner());
-            OGRoute.setRate(newRoute.getRate());
-            OGRoute.setLocations(newRoute.getLocations());
-            OGRoute.setDescription(newRoute.getDescription());
-
-            // Save the updated route
-            return routeRepository.save(OGRoute);
-    }
-
 
     public boolean applyToModerator(Long touristId) {
 
@@ -82,5 +48,21 @@ public class TouristService {
         }
         return false;
     }
+
+    public Tourist editTourist(Long touristId, Tourist tourist) {
+        Tourist touristToEdit = touristRepository.findById(touristId)
+                .orElseThrow(() -> new UserNotFoundException(touristId));
+
+        touristToEdit.setUsername(tourist.getUsername());
+        touristToEdit.setPassword(tourist.getPassword());
+        touristToEdit.setEmail(tourist.getEmail());
+        touristToEdit.setRole(tourist.getRole());
+        touristToEdit.setPhoto(tourist.getPhoto());
+        touristRepository.save(touristToEdit);
+
+        return touristToEdit;
+    }
+
+
 
 }

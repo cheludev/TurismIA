@@ -1,6 +1,12 @@
 package com.turismea.service;
 
+import com.turismea.exception.UserNotFoundException;
+import com.turismea.model.Location;
+import com.turismea.model.Moderator;
+import com.turismea.model.User;
+import com.turismea.repository.LocationRepository;
 import com.turismea.repository.ModeratorRepository;
+import com.turismea.repository.UserRepository;
 import jakarta.persistence.Entity;
 import org.springframework.stereotype.Service;
 
@@ -8,8 +14,34 @@ import org.springframework.stereotype.Service;
 public class ModeratorService {
 
     private final ModeratorRepository moderatorRepository;
-    public ModeratorService(ModeratorRepository moderatorRepository){
+    private final UserRepository userRepository;
+
+    public ModeratorService(ModeratorRepository moderatorRepository, UserRepository userRepository){
         this.moderatorRepository = moderatorRepository;
+        this.userRepository = userRepository;
+    }
+
+
+    public Moderator registerModerator(User user, String province) {
+        Moderator moderator = new Moderator();
+        moderator.setUsername(user.getUsername());
+        moderator.setPassword(user.getPassword());
+        moderator.setEmail(user.getEmail());
+        moderator.setProvince(province);
+        moderatorRepository.save(moderator);
+
+        return moderator;
+    }
+
+    public boolean deleteModerator(Long id) {
+        moderatorRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        moderatorRepository.removeModeratorById(id);
+        return userRepository.existsUserById(id);
+    }
+
+    public void applyToChangeTheProvince(Long moderatorId, String newProvince){
+
     }
 
 

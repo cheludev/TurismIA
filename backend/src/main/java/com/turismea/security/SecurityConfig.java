@@ -1,8 +1,12 @@
 package com.turismea.security;
 
+import com.turismea.model.Role;
+import com.turismea.model.User;
+import com.turismea.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,6 +15,12 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
+    private final UserRepository userRepository;
+
+    public SecurityConfig(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -25,7 +35,7 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .permitAll()
                 )
-                .logout(logout -> logout.permitAll()); // Configurar logout
+                .logout(LogoutConfigurer::permitAll); // Configurar logout
 
         return http.build();
     }
@@ -33,5 +43,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // Encriptación de contraseñas
+    }
+
+    public Role getRoleFromUser(Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        return user == null? null : user.getRole();
     }
 }

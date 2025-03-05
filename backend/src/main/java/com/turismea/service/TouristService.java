@@ -1,28 +1,26 @@
 package com.turismea.service;
 
-import com.turismea.exception.NotTheOwnerOfRouteEception;
-import com.turismea.exception.RouteNotFoundException;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.*;
-import com.turismea.repository.AdminRepository;
-import com.turismea.repository.RouteRepository;
-import com.turismea.repository.TouristRepository;
+import com.turismea.model.enumerations.Role;
+import com.turismea.repository.*;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TouristService {
 
     private final TouristRepository touristRepository;
     private final AdminRepository adminRepository;
+    private final ReportRepository reportRepository;
+    private final RequestRepository requestRepository;
     private RouteRepository routeRepository;
 
 
-    public TouristService(TouristRepository touristRepository, AdminRepository adminRepository) {
+    public TouristService(TouristRepository touristRepository, AdminRepository adminRepository, ReportRepository reportRepository, RequestRepository requestRepository) {
         this.touristRepository = touristRepository;
         this.adminRepository = adminRepository;
+        this.reportRepository = reportRepository;
+        this.requestRepository = requestRepository;
     }
 
     public Tourist registerTourist(User user) {
@@ -36,15 +34,14 @@ public class TouristService {
         return tourist;
     }
 
-    public boolean applyToModerator(Long touristId) {
+    public boolean applyToModerator(Long touristId, String province) {
 
         Tourist tourist = touristRepository.findById(touristId)
                 .orElseThrow(() -> new UserNotFoundException(touristId));
 
         if(!tourist.getRole().equals(Role.MODERATOR)) {
-            Promotion promotion = new Promotion(tourist);
-            adminRepository.getReportList(tourist.getId()).add(promotion);
-            return adminRepository.getReportList(tourist.getId()).contains(promotion);
+            Request promotion = new Request(tourist); //It is already added to tourist
+
         }
         return false;
     }

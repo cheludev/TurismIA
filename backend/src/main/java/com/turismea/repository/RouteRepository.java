@@ -1,5 +1,6 @@
 package com.turismea.repository;
 
+import com.turismea.model.City;
 import com.turismea.model.Route;
 import com.turismea.model.Tourist;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public interface RouteRepository extends JpaRepository<Route, Long> {
     List<Route> findRouteByOwner_Id(Long ownerId);
-    List<Route> getRoutesByCity(String city);
+    List<Route> getRoutesByCity(City city);
     @Query(value = "SELECT DISTINCT R FROM Route R WHERE R.owner = :owner")
     List<Route> getRouteByOwner(@Param("owner") Tourist owner);
 }

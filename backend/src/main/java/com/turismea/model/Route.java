@@ -12,13 +12,19 @@ public class Route {
     private Long id;
 
     private String name;
-    private String city;
+
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private Tourist owner;
 
     private int rate;
+
+    @OneToOne(mappedBy = "route")
+    private Report report;
 
     @ManyToMany
     @JoinTable(
@@ -32,7 +38,7 @@ public class Route {
     @Lob
     private String description;
 
-    public Route(Long id, String name, String city, Tourist owner, int rate, List<Location> locations, String description) {
+    public Route(Long id, String name, City city, Tourist owner, int rate, List<Location> locations, String description) {
         this.id = id;
         this.name = name;
         this.city = city;
@@ -46,11 +52,11 @@ public class Route {
 
     }
 
-    public String getCity() {
+    public City getCity() {
         return city;
     }
 
-    public void setCity(String city) {
+    public void setCity(City city) {
         this.city = city;
     }
 

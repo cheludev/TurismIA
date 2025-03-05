@@ -1,5 +1,7 @@
 package com.turismea.model;
 
+import com.turismea.model.enumerations.ReportType;
+import com.turismea.model.enumerations.RequestStatus;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,7 +12,7 @@ public class Report {
 
     @ManyToOne
     @JoinColumn(name = "admin_id", nullable = false)
-    private Admin assignedTo;
+    private Admin admin;
 
     @OneToOne
     private Route route;
@@ -22,15 +24,24 @@ public class Report {
     @Lob
     private String description;
 
-    public Report(Long id, Admin assignedTo, Route route, Tourist tourist, String description) {
+    @Column(nullable = false)
+    private RequestStatus requestStatus;
+
+    private ReportType type;
+
+
+    public Report(Long id, Admin admin, Route route, Tourist tourist, String description) {
         this.id = id;
-        this.assignedTo = assignedTo;
+        this.admin = admin;
         this.route = route;
         this.tourist = tourist;
         this.description = description;
+        this.requestStatus = RequestStatus.PENDING;
     }
+
     public Report() {
     }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -54,12 +65,12 @@ public class Report {
         this.route = route;
     }
 
-    public Admin getAssignedTo() {
-        return assignedTo;
+    public Admin getAdmin() {
+        return admin;
     }
 
-    public void setAssignedTo(Admin assignedTo) {
-        this.assignedTo = assignedTo;
+    public void setAdmin(Admin assignedTo) {
+        this.admin = assignedTo;
     }
 
     public String getDescription() {
@@ -69,4 +80,29 @@ public class Report {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public RequestStatus getStatus() {
+        return requestStatus;
+    }
+
+    public void setStatus(RequestStatus requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
+    public ReportType getType() {
+        return type;
+    }
+
+    public void setType(ReportType type) {
+        this.type = type;
+    }
+
+    public RequestStatus getRequestStatus() {
+        return requestStatus;
+    }
+
+    public void setRequestStatus(RequestStatus requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
 }

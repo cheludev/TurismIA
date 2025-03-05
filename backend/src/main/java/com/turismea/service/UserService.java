@@ -1,8 +1,5 @@
 package com.turismea.service;
 
-import com.turismea.model.Moderator;
-import com.turismea.model.Role;
-import com.turismea.model.Tourist;
 import com.turismea.model.User;
 import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.TouristRepository;

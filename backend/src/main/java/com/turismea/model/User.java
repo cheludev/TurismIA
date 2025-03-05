@@ -1,5 +1,7 @@
 package com.turismea.model;
 
+import com.turismea.model.enumerations.Province;
+import com.turismea.model.enumerations.Role;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -84,4 +86,7 @@ public class User {
     public void setRole(Role role) { this.role = role; }
     public void setPhoto(byte[] photo) {this.photo = photo;}
 
+    public void setProvince(Province province) {
+
+    }
 }

@@ -4,6 +4,7 @@ import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.Location;
 import com.turismea.model.Moderator;
 import com.turismea.model.User;
+import com.turismea.model.enumerations.Province;
 import com.turismea.repository.LocationRepository;
 import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.UserRepository;
@@ -22,7 +23,7 @@ public class ModeratorService {
     }
 
 
-    public Moderator registerModerator(User user, String province) {
+    public Moderator registerModerator(User user, Province province) {
         Moderator moderator = new Moderator();
         moderator.setUsername(user.getUsername());
         moderator.setPassword(user.getPassword());

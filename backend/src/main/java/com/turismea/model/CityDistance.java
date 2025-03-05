@@ -3,7 +3,11 @@ package com.turismea.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "city_distances")
+@Table(name = "city_distances",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"city_id", "location_a_id", "location_b_id"}),
+        indexes = {
+                @Index(name = "idx_location_pair", columnList = "location_a_id, location_b_id")
+        })
 public class CityDistance {
 
     @Id
@@ -23,14 +27,21 @@ public class CityDistance {
     private Location locationB;
 
     @Column(nullable = false)
-    private int distance; // en metros
+    private int distance;
 
     @Column(nullable = false)
-    private int duration; // en segundos
+    private int duration;
 
     public CityDistance() {}
 
     public CityDistance(City city, Location locationA, Location locationB, int distance, int duration) {
+        // Avoid duplicates in reverse order
+        if (locationA.getId() > locationB.getId()) {
+            Location temp = locationA;
+            locationA = locationB;
+            locationB = temp;
+        }
+
         this.city = city;
         this.locationA = locationA;
         this.locationB = locationB;
@@ -87,4 +98,3 @@ public class CityDistance {
         this.duration = duration;
     }
 }
-

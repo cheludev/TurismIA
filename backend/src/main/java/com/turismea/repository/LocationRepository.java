@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Long> {
-    List<Location> findByCity(String city);
-    List<Location> getLocationByCity(String city);
-    List<Location> getLocationByValidatedAndCity(boolean validated, String city);
+    List<Location> findByCity(City city);
+    List<Location> getLocationByCity(City city);
+    List<Location> getLocationByValidatedAndCity(boolean validated, City city);
 }

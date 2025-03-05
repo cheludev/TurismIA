@@ -12,7 +12,7 @@ public class Tourist extends User{
     private List<Route> savedRoutes;
 
     @OneToOne
-    private Promotion promotion;
+    private Request promoteToModeratorRequest;
 
     public Tourist() {
         super();

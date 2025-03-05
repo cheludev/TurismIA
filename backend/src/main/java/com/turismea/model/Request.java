@@ -1,5 +1,7 @@
 package com.turismea.model;
 
+import com.turismea.model.enumerations.RequestType;
+import com.turismea.model.enumerations.RequestStatus;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,11 +11,25 @@ public class Request {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "report_admin")
+    private Admin admin;
+
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Enumerated(EnumType.STRING)
     private RequestType type;
+
+    private RequestStatus requestStatus;
+
+    public Request(User tourist) {
+        requestStatus = RequestStatus.PENDING;
+    }
+
+    public Request() {
+
+    }
 
     // Getters y Setters
     public User getUser() {
@@ -38,6 +54,13 @@ public class Request {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public RequestStatus getStatus() {
+        return this.requestStatus;
+    }
+
+    public void setStatus(RequestStatus requestStatus) {
     }
 }
 

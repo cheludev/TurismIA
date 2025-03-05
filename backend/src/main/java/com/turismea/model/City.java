@@ -13,13 +13,20 @@ public class City {
     private String name;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "city", orphanRemoval = true)
+    @Column(name = "locations")
     private List<Location> locations;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "city" , orphanRemoval = true)
+    @Column(name = "moderators")
     private List<Moderator> moderators;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "city", orphanRemoval = true)
+    @Column(name = "routes")
     private List<Route> routes;
+
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "city", orphanRemoval = true)
+    @Column(name = "distance_matrix")
+    private List<CityDistance> distanceMatrix;
 
     public City(Long id, String name, List<Location> locations, List<Moderator> moderators, List<Route> routes) {
         this.id = id;

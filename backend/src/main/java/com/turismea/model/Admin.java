@@ -1,22 +1,20 @@
 package com.turismea.model;
 
-
-import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
 @Table(name = "admin")
 public class Admin extends User {
 
-
-    @OneToMany(mappedBy = "assignedTo", fetch = FetchType.LAZY) //We mark it as LAZY to avoid performance problems.
+    @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
     private List<Report> reportList;
-    @OneToMany
-    private List<Tourist> appliedToModerator;
-    @OneToMany
-    private List<Moderator> appliedToChangeTheProvince;
+
+    @OneToMany(mappedBy = "admin")
+    private List<Request> appliedToModerator;
+
+    @OneToMany(mappedBy = "admin")
+    private List<Request> appliedToChangeTheProvince;
 
     // Default constructor
     public Admin() {}

@@ -14,6 +14,7 @@ import java.util.List;
 
 public interface TouristRepository extends JpaRepository<Tourist, Long> {
 
-    @Query(value = "SELECT t.savedRoutes FROM Tourist t WHERE T.id = :id")
+    @Query(value = "SELECT t.savedRoutes FROM Tourist t WHERE t.id = :id")
     public List<Route> getSavedRoutes(@Param("id") Long id);
+
 }

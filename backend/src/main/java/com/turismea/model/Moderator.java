@@ -1,24 +1,27 @@
 package com.turismea.model;
 
 
+import com.turismea.model.enumerations.Province;
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
-@Table(name = "tourist")
+@Table(name = "moderator")
 public class Moderator extends User{
 
     @Column(nullable = false)
-    private String province;
+    @Enumerated(EnumType.STRING)
+    private Province province;
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name = "city_id")
     private City city;
 
-    public Moderator(String province, City city) {
+    @OneToOne
+    @JoinColumn(nullable = false)
+    private Request changeProvinceRequest;
+
+    public Moderator(Province province, City city) {
         this.province = province;
-        this.city = city;
     }
 
     // Default constructor
@@ -26,15 +29,11 @@ public class Moderator extends User{
 
     // Getters and Setters
 
-    public void setCity(City city) {
-        this.city = city;
-    }
-
-    public String getProvince() {
+    public Province getProvince() {
         return province;
     }
 
-    public void setProvince(String province) {
+    public void setProvince(Province province) {
         this.province = province;
     }
 }

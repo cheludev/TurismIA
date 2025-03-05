@@ -1,10 +1,13 @@
 package com.turismea.service;
 
-import com.turismea.exception.NotTheOwnerOfRouteEception;
+import com.turismea.exception.NotTheOwnerOfRouteException;
+import com.turismea.exception.NotTheOwnerOfRouteException;
 import com.turismea.exception.RouteNotFoundException;
 import com.turismea.exception.UserNotFoundException;
+import com.turismea.model.City;
 import com.turismea.model.Route;
 import com.turismea.model.Tourist;
+import com.turismea.repository.CityRepository;
 import com.turismea.repository.RouteRepository;
 import com.turismea.repository.TouristRepository;
 import org.springframework.stereotype.Service;
@@ -15,11 +18,13 @@ import java.util.List;
 public class RouteService {
     private final RouteRepository routeRepository;
     private final TouristRepository touristRepository;
+    private final CityRepository cityRepository;
 
 
-    public RouteService(RouteRepository routeRepository, TouristRepository touristRepository) {
+    public RouteService(RouteRepository routeRepository, TouristRepository touristRepository, CityRepository cityRepository) {
         this.routeRepository = routeRepository;
         this.touristRepository = touristRepository;
+        this.cityRepository = cityRepository;
     }
 
     public RouteRepository getRouteRepository() {
@@ -46,7 +51,7 @@ public class RouteService {
 
         // Check if the touristId is the owner of the route
         if (!OGRoute.getOwner().getId().equals(touristId)) {
-            throw new NotTheOwnerOfRouteEception();
+            throw new NotTheOwnerOfRouteException(touristId, originalRouteId);
         }
 
 
@@ -69,7 +74,8 @@ public class RouteService {
     }
 
     public List<Route> getRoutesByCity(String city) {
-        return routeRepository.getRoutesByCity(city);
+        City cityAux = cityRepository.findByName(city);
+        return routeRepository.getRoutesByCity(cityAux);
     }
 
     public List<Route> getRoutesByOwner(Long ownerId) {

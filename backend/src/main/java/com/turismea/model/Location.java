@@ -11,7 +11,9 @@ public class Location {
     private Long id;
 
     private String name;
-    private String city;
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
 
     private String address;
     private Double latitude;
@@ -29,7 +31,7 @@ public class Location {
     @ManyToMany(mappedBy = "locations") // Relación inversa
     private List<Route> routes;
 
-    public Location(Long id, String name, String city, String address, Double latitude,
+    public Location(Long id, String name, City city, String address, Double latitude,
                     Double longitude, String placeId, int averageTime, boolean validated,
                     String info, List<Route> routes) {
         this.id = id;
@@ -113,11 +115,11 @@ public class Location {
         this.address = address;
     }
 
-    public String getCity() {
+    public City getCity() {
         return city;
     }
 
-    public void setCity(String city) {
+    public void setCity(City city) {
         this.city = city;
     }
 

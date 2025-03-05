@@ -1,6 +1,6 @@
 package com.turismea.controller;
 
-import com.turismea.exception.NotTheOwnerOfRouteEception;
+import com.turismea.exception.NotTheOwnerOfRouteException;
 import com.turismea.exception.RouteNotFoundException;
 import com.turismea.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler(NotTheOwnerOfRouteEception.class)
+    @ExceptionHandler(NotTheOwnerOfRouteException.class)
     public ResponseEntity<String> handlerNotTheOwner() {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the owner of the route.");
     }

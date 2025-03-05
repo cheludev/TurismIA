@@ -1,4 +1,4 @@
-package com.turismea.model;
+package com.turismea.model.enumerations;
 
 public enum RequestType {
     TO_MODERATOR,

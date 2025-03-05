@@ -1,6 +1,7 @@
 package com.turismea.service;
 
 import com.turismea.exception.LocationNotFoundException;
+import com.turismea.model.City;
 import com.turismea.model.Location;
 import com.turismea.model.Moderator;
 import com.turismea.repository.LocationRepository;
@@ -35,11 +36,11 @@ public class LocationService {
 
     }
 
-    public List<Location> getValidatedLocationByCity(String city) {
+    public List<Location> getValidatedLocationByCity(City city) {
         return locationRepository.getLocationByValidatedAndCity(true, city);
     }
 
-    public List<Location> getAllLocationByCity(String city) {
+    public List<Location> getAllLocationByCity(City city) {
         return locationRepository.getLocationByCity(city);
     }
 

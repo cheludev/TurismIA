@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-public class Location {
+public class Spot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,7 +18,7 @@ public class Location {
     private String address;
     private Double latitude;
     private Double longitude;
-    private String placeId; // ID de Google Maps
+    private String placeId;
 
     private int averageTime;
     private boolean validated;
@@ -28,13 +28,12 @@ public class Location {
     private String info;
 
 
-    @ManyToMany(mappedBy = "locations") // Relación inversa
+    @ManyToMany(mappedBy = "spots")
     private List<Route> routes;
 
-    public Location(Long id, String name, City city, String address, Double latitude,
-                    Double longitude, String placeId, int averageTime, boolean validated,
-                    String info, List<Route> routes) {
-        this.id = id;
+    public Spot(String name, City city, String address, Double latitude,
+                Double longitude, String placeId, int averageTime, boolean validated,
+                String info, List<Route> routes) {
         this.name = name;
         this.city = city;
         this.address = address;
@@ -47,7 +46,7 @@ public class Location {
         this.routes = routes;
     }
 
-    public Location() {
+    public Spot() {
 
     }
 

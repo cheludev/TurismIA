@@ -1,5 +1,6 @@
 package com.turismea.model;
 
+import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;
 import com.turismea.model.enumerations.RequestStatus;
 import jakarta.persistence.*;
@@ -18,13 +19,21 @@ public class Request {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Lob
+    private String reasonsOfTheRequest;
+
     @Enumerated(EnumType.STRING)
     private RequestType type;
 
+    private Province province;
+
     private RequestStatus requestStatus;
 
-    public Request(User tourist) {
-        requestStatus = RequestStatus.PENDING;
+    public Request(User user, RequestType type, String reasonsOfTheRequest, Province province) {
+        this.user = user;
+        this.reasonsOfTheRequest = reasonsOfTheRequest;
+        this.requestStatus = RequestStatus.PENDING;
+        this.province = province;
     }
 
     public Request() {

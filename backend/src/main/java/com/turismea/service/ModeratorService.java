@@ -1,14 +1,11 @@
 package com.turismea.service;
 
 import com.turismea.exception.UserNotFoundException;
-import com.turismea.model.Location;
 import com.turismea.model.Moderator;
 import com.turismea.model.User;
 import com.turismea.model.enumerations.Province;
-import com.turismea.repository.LocationRepository;
 import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.UserRepository;
-import jakarta.persistence.Entity;
 import org.springframework.stereotype.Service;
 
 @Service

@@ -17,4 +17,5 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
     @Query(value = "SELECT a.reportList FROM Admin a WHERE a.id = :id")
     public List<Report> getReportList(@Param("id") Long id);
 
+    Optional<Admin> findFirstByOrderByIdAsc();
 }

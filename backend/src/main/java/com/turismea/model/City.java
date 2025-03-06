@@ -13,8 +13,8 @@ public class City {
     private String name;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "city", orphanRemoval = true)
-    @Column(name = "locations")
-    private List<Location> locations;
+    @Column(name = "spots")
+    private List<Spot> spots;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "city" , orphanRemoval = true)
     @Column(name = "moderators")
@@ -28,10 +28,9 @@ public class City {
     @Column(name = "distance_matrix")
     private List<CityDistance> distanceMatrix;
 
-    public City(Long id, String name, List<Location> locations, List<Moderator> moderators, List<Route> routes) {
-        this.id = id;
+    public City(String name, List<Spot> spots, List<Moderator> moderators, List<Route> routes) {
         this.name = name;
-        this.locations = locations;
+        this.spots = spots;
         this.moderators = moderators;
         this.routes = routes;
     }
@@ -48,12 +47,12 @@ public class City {
         this.name = name;
     }
 
-    public List<Location> getLocations() {
-        return locations;
+    public List<Spot> getSpots() {
+        return spots;
     }
 
-    public void setLocations(List<Location> locations) {
-        this.locations = locations;
+    public void setSpots(List<Spot> spots) {
+        this.spots = spots;
     }
 
     public List<Moderator> getModerators() {

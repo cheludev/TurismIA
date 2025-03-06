@@ -3,7 +3,6 @@ package com.turismea.model;
 import jakarta.persistence.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 public class Route {
@@ -30,21 +29,21 @@ public class Route {
     @JoinTable(
             name = "route_location",  // Intermediate name table
             joinColumns = @JoinColumn(name = "route_id"),  // Foreign key -> Route
-            inverseJoinColumns = @JoinColumn(name = "location_id") // Foreign key -> Location
+            inverseJoinColumns = @JoinColumn(name = "location_id") // Foreign key -> Spot
     )
-    private List<Location> locations; //We create an intermediate table which contains the relation between Routes and they locations.
+    private List<Spot> spots; //We create an intermediate table which contains the relation between Routes and they spots.
 
     @Column(columnDefinition = "TEXT")
     @Lob
     private String description;
 
-    public Route(Long id, String name, City city, Tourist owner, int rate, List<Location> locations, String description) {
+    public Route(Long id, String name, City city, Tourist owner, int rate, List<Spot> spots, String description) {
         this.id = id;
         this.name = name;
         this.city = city;
         this.owner = owner;
         this.rate = rate;
-        this.locations = locations;
+        this.spots = spots;
         this.description = description;
     }
 
@@ -92,12 +91,12 @@ public class Route {
         this.rate = rate;
     }
 
-    public List<Location> getPath() {
-        return locations;
+    public List<Spot> getPath() {
+        return spots;
     }
 
-    public void setPath(List<Location> path) {
-        this.locations = path;
+    public void setPath(List<Spot> path) {
+        this.spots = path;
     }
 
     public String getDescription() {
@@ -108,12 +107,12 @@ public class Route {
         this.description = description;
     }
 
-    public List<Location> getLocations() {
-        return locations;
+    public List<Spot> getSpots() {
+        return spots;
     }
 
-    public void setLocations(List<Location> locations) {
-        this.locations = locations;
+    public void setSpots(List<Spot> spots) {
+        this.spots = spots;
     }
 
 }

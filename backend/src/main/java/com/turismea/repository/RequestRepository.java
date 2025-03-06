@@ -2,6 +2,8 @@ package com.turismea.repository;
 
 import com.turismea.model.Report;
 import com.turismea.model.Request;
+import com.turismea.model.Tourist;
+import com.turismea.model.User;
 import com.turismea.model.enumerations.RequestType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +18,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> getRequestByType(@Param("type")RequestType type);
 
 
+    boolean existsByUserAndType(User user, RequestType type);
 }

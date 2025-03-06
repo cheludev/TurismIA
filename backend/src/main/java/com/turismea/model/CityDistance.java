@@ -20,11 +20,11 @@ public class CityDistance {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "location_a_id", nullable = false)
-    private Location locationA;
+    private Spot spotA;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "location_b_id", nullable = false)
-    private Location locationB;
+    private Spot spotB;
 
     @Column(nullable = false)
     private int distance;
@@ -34,17 +34,17 @@ public class CityDistance {
 
     public CityDistance() {}
 
-    public CityDistance(City city, Location locationA, Location locationB, int distance, int duration) {
+    public CityDistance(City city, Spot spotA, Spot spotB, int distance, int duration) {
         // Avoid duplicates in reverse order
-        if (locationA.getId() > locationB.getId()) {
-            Location temp = locationA;
-            locationA = locationB;
-            locationB = temp;
+        if (spotA.getId() > spotB.getId()) {
+            Spot temp = spotA;
+            spotA = spotB;
+            spotB = temp;
         }
 
         this.city = city;
-        this.locationA = locationA;
-        this.locationB = locationB;
+        this.spotA = spotA;
+        this.spotB = spotB;
         this.distance = distance;
         this.duration = duration;
     }
@@ -66,20 +66,20 @@ public class CityDistance {
         this.city = city;
     }
 
-    public Location getLocationA() {
-        return locationA;
+    public Spot getSpotA() {
+        return spotA;
     }
 
-    public void setLocationA(Location locationA) {
-        this.locationA = locationA;
+    public void setSpotA(Spot spotA) {
+        this.spotA = spotA;
     }
 
-    public Location getLocationB() {
-        return locationB;
+    public Spot getSpotB() {
+        return spotB;
     }
 
-    public void setLocationB(Location locationB) {
-        this.locationB = locationB;
+    public void setSpotB(Spot spotB) {
+        this.spotB = spotB;
     }
 
     public int getDistance() {

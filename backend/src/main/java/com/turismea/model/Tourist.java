@@ -20,4 +20,5 @@ public class Tourist extends User{
 
     public List<Route> getSavedRoutes() { return savedRoutes; }
     public void setSavedRoutes(List<Route> routes) { this.savedRoutes = routes; }
+
 }

@@ -39,8 +39,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    public User(Long id, String username, String email, String password, byte[] photo, Role role) {
-        this.id = id;
+    public User(String username, String email, String password, byte[] photo, Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -85,7 +84,9 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public void setRole(Role role) { this.role = role; }
     public void setPhoto(byte[] photo) {this.photo = photo;}
-
+    public void setId(Long id) {
+        this.id = id;
+    }
     public void setProvince(Province province) {
 
     }

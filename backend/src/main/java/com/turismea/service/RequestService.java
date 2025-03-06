@@ -1,8 +1,7 @@
 package com.turismea.service;
 
 import com.turismea.exception.RequestNotFoundException;
-import com.turismea.model.Request;
-import com.turismea.model.User;
+import com.turismea.model.*;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;
 import com.turismea.model.enumerations.Role;
@@ -22,23 +21,49 @@ public class RequestService {
         this.userRepository = userRepository;
     }
 
+    public Request createRequest(User user, RequestType type,  String reasonsOfTheRequest, Province province) {
+        return requestRepository.save(new Request(user, type, reasonsOfTheRequest, province));
+    }
     public void manageRequest(Long requestId, RequestStatus requestStatus, Province province) {
-
-        Request request = requestRepository.findById(requestId).orElseThrow(() -> new RequestNotFoundException(requestId));
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RequestNotFoundException(requestId));
         User user = request.getUser();
 
-        if(request.getType() == RequestType.TO_MODERATOR){
-            if(requestStatus == RequestStatus.APPROVED) {
-                user.setRole(Role.MODERATOR);
-            }
-        } else {
-            if(requestStatus == RequestStatus.APPROVED) {
-                user.setProvince(province);
-            }
+        if (requestStatus == RequestStatus.APPROVED) {
+            approveRequest(request, user, province);
         }
+
         request.setStatus(requestStatus);
+        //In Java we can modify the parameters of an object in another function
+        //It is similar to referenced parameter in C++, so we can save only in the
+        //original method
         requestRepository.save(request);
         userRepository.save(user);
     }
+
+    private void approveRequest(Request request, User user, Province province) {
+        if (request.getType() == RequestType.TO_MODERATOR) {
+            approveModeratorRequest(user);
+        } else {
+            approveProvinceRequest(user, province);
+        }
+    }
+
+    private void approveModeratorRequest(User user) {
+        user.setRole(Role.MODERATOR);
+    }
+
+    private void approveProvinceRequest(User user, Province province) {
+        user.setProvince(province);
+    }
+
+    private void denyRequest(Request request) {
+        request.setStatus(RequestStatus.DENIED);
+    }
+
+    public void deleteRequest(Request request) {
+        requestRepository.delete(request);
+    }
+
 
 }

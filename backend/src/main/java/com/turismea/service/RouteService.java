@@ -31,7 +31,7 @@ public class RouteService {
         return routeRepository;
     }
 
-    public List<Route> saveRoute(Long touristId, Route route) { //Save both types of routes
+    public List<Route> saveRoute(Long touristId, Route route) {
         Tourist tourist = touristRepository.findById(touristId)
                 .orElseThrow(() -> new UserNotFoundException(touristId));
 
@@ -60,7 +60,7 @@ public class RouteService {
         OGRoute.setCity(newRoute.getCity());
         OGRoute.setOwner(newRoute.getOwner());
         OGRoute.setRate(newRoute.getRate());
-        OGRoute.setLocations(newRoute.getLocations());
+        OGRoute.setSpots(newRoute.getSpots());
         OGRoute.setDescription(newRoute.getDescription());
 
         // Save the updated route

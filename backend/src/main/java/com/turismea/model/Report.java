@@ -30,8 +30,7 @@ public class Report {
     private ReportType type;
 
 
-    public Report(Long id, Admin admin, Route route, Tourist tourist, String description) {
-        this.id = id;
+    public Report(Admin admin, Route route, Tourist tourist, String description) {
         this.admin = admin;
         this.route = route;
         this.tourist = tourist;

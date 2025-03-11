@@ -1,5 +1,6 @@
 package com.turismea.service;
 
+import com.turismea.exception.AlreadyAppliedException;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.*;
 import com.turismea.model.enumerations.Province;
@@ -9,21 +10,19 @@ import com.turismea.repository.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class TouristService {
 
     private final TouristRepository touristRepository;
-    private final AdminRepository adminRepository;
-    private final ReportRepository reportRepository;
-    private final RequestRepository requestRepository;
-    private RouteRepository routeRepository;
+    private final RequestService requestService;
     private final PasswordEncoder passwordEncoder;
 
-    public TouristService(TouristRepository touristRepository, AdminRepository adminRepository, ReportRepository reportRepository, RequestRepository requestRepository, PasswordEncoder passwordEncoder) {
+    public TouristService(TouristRepository touristRepository, RequestService requestService,
+                          PasswordEncoder passwordEncoder) {
         this.touristRepository = touristRepository;
-        this.adminRepository = adminRepository;
-        this.reportRepository = reportRepository;
-        this.requestRepository = requestRepository;
+        this.requestService = requestService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -37,9 +36,7 @@ public class TouristService {
                 || touristRepository.existsTouristByEmail(tourist.getEmail())){
             return null;
         }
-        touristRepository.save((tourist));
-
-        return tourist;
+        return touristRepository.save((tourist));
     }
 
     public boolean applyToModerator(Long touristId, Province province, String reasons) {
@@ -51,13 +48,13 @@ public class TouristService {
             return false;
         }
 
-        boolean alreadyApplied = requestRepository.existsByUserAndType(tourist, RequestType.TO_MODERATOR);
+        boolean alreadyApplied = requestService.existsByUserAndType(tourist, RequestType.TO_MODERATOR);
         if (alreadyApplied) {
-            return false;
+            throw new AlreadyAppliedException(touristId, RequestType.TO_MODERATOR);
         }
 
         Request request = new Request(tourist, RequestType.TO_MODERATOR, reasons, province);
-        requestRepository.save(request);
+        requestService.save(request);
         return true;
     }
 
@@ -71,11 +68,18 @@ public class TouristService {
         touristToEdit.setEmail(tourist.getEmail());
         touristToEdit.setRole(tourist.getRole());
         touristToEdit.setPhoto(tourist.getPhoto());
-        touristRepository.save(touristToEdit);
-
-        return touristToEdit;
+        return touristRepository.save(touristToEdit);
     }
 
+    public void delete(Tourist tourist) {
+        touristRepository.delete(tourist);
+    }
 
+    public Tourist save(Tourist tourist) {
+        return touristRepository.save(tourist);
+    }
 
+    public Optional<Tourist> findById(Long touristId) {
+        return touristRepository.findById(touristId);
+    }
 }

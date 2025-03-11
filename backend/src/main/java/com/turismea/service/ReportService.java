@@ -10,7 +10,6 @@ import com.turismea.model.enumerations.ReportType;
 import com.turismea.repository.AdminRepository;
 import com.turismea.repository.ReportRepository;
 import com.turismea.repository.RouteRepository;
-import com.turismea.repository.TouristRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,22 +17,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportService {
 
     private final ReportRepository reportRepository;
-    private final RouteRepository routeRepository;
-    private final TouristRepository touristRepository;
-    private final AdminRepository adminRepository;
 
-    public ReportService(ReportRepository reportRepository, RouteRepository routeRepository,
-                         TouristRepository touristRepository, AdminRepository adminRepository) {
+    private final RouteService routeService;
+    private final TouristService touristService;
+    private final AdminService adminService;
+
+    public ReportService(ReportRepository reportRepository, RouteRepository routeService, RouteService routeRepository1,
+                         TouristService touristService, AdminService adminService) {
         this.reportRepository = reportRepository;
-        this.routeRepository = routeRepository;
-        this.touristRepository = touristRepository;
-        this.adminRepository = adminRepository;
+        this.routeService = routeRepository1;
+        this.touristService = touristService;
+        this.adminService = adminService;
     }
 
     @Transactional
     public Report createReport(Tourist tourist, Route route, String description) {
-        Admin admin = adminRepository.findFirstByOrderByIdAsc()
-                .orElseGet(() -> adminRepository.save(new Admin()));
+        Admin admin = adminService.findFirstByOrderByIdAsc()
+                .orElseGet(() -> adminService.save(new Admin("admin", "administrator081216")));
 
         Report report = new Report(admin, route, tourist, description);
         return reportRepository.save(report);
@@ -60,17 +60,17 @@ public class ReportService {
         deleteReport(report);
     }
 
-    private void deleteRoute(Report report) {
+    void deleteRoute(Report report) {
         Route route = report.getRoute();
         if (route != null) {
-            routeRepository.delete(route);
+            routeService.delete(route);
         }
     }
 
-    private void deleteTourist(Report report) {
+    void deleteTourist(Report report) {
         Tourist tourist = report.getTourist();
         if (tourist != null) {
-            touristRepository.delete(tourist);
+            touristService.delete(tourist);
         }
     }
 

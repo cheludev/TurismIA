@@ -16,4 +16,6 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     List<Route> getRoutesByCity(City city);
     @Query(value = "SELECT DISTINCT R FROM Route R WHERE R.owner = :owner")
     List<Route> getRouteByOwner(@Param("owner") Tourist owner);
+
+    List<Route> getRoutesByOwner(Tourist tourist);
 }

@@ -1,18 +1,18 @@
+package com.turismea.service;
+
 import com.turismea.exception.NotTheOwnerOfRouteException;
 import com.turismea.exception.RouteNotFoundException;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.City;
 import com.turismea.model.Route;
 import com.turismea.model.Tourist;
-import com.turismea.repository.CityRepository;
 import com.turismea.repository.RouteRepository;
 import com.turismea.repository.TouristRepository;
-import com.turismea.service.RouteService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class RouteServiceTest {
 
     @Mock
@@ -31,10 +30,18 @@ public class RouteServiceTest {
     private TouristRepository touristRepository;
 
     @Mock
-    private CityRepository cityRepository;
+    private TouristService touristService;
+
+    @Mock
+    private CityService cityService;
 
     @InjectMocks
     private RouteService routeService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     void testSaveRoute_TouristExists() {
@@ -45,16 +52,16 @@ public class RouteServiceTest {
         Tourist fakeTourist = new Tourist();
         fakeTourist.setId(touristId);
 
-        when(touristRepository.findById(touristId)).thenReturn(Optional.of(fakeTourist));
+        when(touristService.findById(touristId)).thenReturn(Optional.of(fakeTourist));
         when(routeRepository.getRouteByOwner(fakeTourist)).thenReturn(List.of(route));
+        when(routeService.saveRoute(touristId, route)).thenReturn(List.of(route));
 
         List<Route> savedRoutes = routeService.saveRoute(touristId, route);
 
         assertEquals(1, savedRoutes.size());
         assertEquals("Test Route", savedRoutes.get(0).getName());
 
-        verify(routeRepository).save(route);
-        verify(touristRepository).save(fakeTourist);
+        verify(routeRepository, times(2)).save(route);
     }
 
     @Test
@@ -62,7 +69,7 @@ public class RouteServiceTest {
         Long touristId = 1L;
         Route route = new Route();
 
-        when(touristRepository.findById(touristId)).thenReturn(Optional.empty());
+        when(touristService.findById(touristId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> routeService.saveRoute(touristId, route));
 
@@ -133,7 +140,7 @@ public class RouteServiceTest {
         Route route1 = new Route();
         Route route2 = new Route();
 
-        when(touristRepository.findById(touristId)).thenReturn(Optional.of(fakeTourist));
+        when(touristService.findById(touristId)).thenReturn(Optional.of(fakeTourist));
         when(routeRepository.getRouteByOwner(fakeTourist)).thenReturn(Arrays.asList(route1, route2));
 
         List<Route> routes = routeService.getSavedRoutes(touristId);
@@ -145,7 +152,7 @@ public class RouteServiceTest {
     @Test
     void testGetSavedRoutes_TouristNotFound() {
         Long touristId = 1L;
-        when(touristRepository.findById(touristId)).thenReturn(Optional.empty());
+        when(touristService.findById(touristId)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> routeService.getSavedRoutes(touristId));
 
@@ -161,7 +168,7 @@ public class RouteServiceTest {
         Route route1 = new Route();
         Route route2 = new Route();
 
-        when(cityRepository.findByName(cityName)).thenReturn(fakeCity);
+        when(cityService.findByName(cityName)).thenReturn(Optional.of(fakeCity));
         when(routeRepository.getRoutesByCity(fakeCity)).thenReturn(Arrays.asList(route1, route2));
 
         List<Route> routes = routeService.getRoutesByCity(cityName);

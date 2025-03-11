@@ -1,13 +1,14 @@
+package com.turismea.service;
+
 import com.turismea.model.City;
 import com.turismea.model.Spot;
 import com.turismea.repository.SpotRepository;
-import com.turismea.service.SpotService;
 import com.turismea.exception.SpotNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+
 public class SpotServiceTest {
 
     @Mock
@@ -24,6 +25,11 @@ public class SpotServiceTest {
 
     @InjectMocks
     private SpotService spotService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     void testValidateSpot() {

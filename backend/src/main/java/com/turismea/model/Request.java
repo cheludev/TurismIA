@@ -19,7 +19,7 @@ public class Request {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Lob
+        @Lob
     private String reasonsOfTheRequest;
 
     @Enumerated(EnumType.STRING)
@@ -31,6 +31,7 @@ public class Request {
 
     public Request(User user, RequestType type, String reasonsOfTheRequest, Province province) {
         this.user = user;
+        this.type = type;
         this.reasonsOfTheRequest = reasonsOfTheRequest;
         this.requestStatus = RequestStatus.PENDING;
         this.province = province;
@@ -70,6 +71,11 @@ public class Request {
     }
 
     public void setStatus(RequestStatus requestStatus) {
+        this.requestStatus = requestStatus;
+    }
+
+    public void setReasonsOfTheRequest(String reasons) {
+        this.reasonsOfTheRequest = reasons;
     }
 }
 

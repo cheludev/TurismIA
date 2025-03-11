@@ -39,6 +39,8 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    private Province province;
+
     public User(String username, String email, String password, byte[] photo, Role role) {
         this.username = username;
         this.email = email;
@@ -88,6 +90,10 @@ public class User {
         this.id = id;
     }
     public void setProvince(Province province) {
+        this.province = province;
+    }
 
+    public Province getProvince() {
+        return this.province;
     }
 }

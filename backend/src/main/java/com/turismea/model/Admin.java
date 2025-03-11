@@ -19,6 +19,11 @@ public class Admin extends User {
     // Default constructor
     public Admin() {}
 
+    public Admin(String user, String password) {
+        this.setUsername(user);
+        this.setPassword(password);
+    }
+
     // Getters and Setters
 
     public List<Report> getReportList() {

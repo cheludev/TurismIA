@@ -8,6 +8,7 @@ import com.turismea.model.enumerations.Role;
 import com.turismea.model.enumerations.RequestStatus;
 import com.turismea.repository.RequestRepository;
 import com.turismea.repository.UserRepository;
+import org.springframework.boot.Banner;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,55 +16,70 @@ public class RequestService {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
-
-    RequestService(RequestRepository requestRepository, UserRepository userRepository) {
+    private final UserService userService;
+    RequestService(RequestRepository requestRepository, UserRepository userRepository, UserService userService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public Request createRequest(User user, RequestType type,  String reasonsOfTheRequest, Province province) {
-        return requestRepository.save(new Request(user, type, reasonsOfTheRequest, province));
+        if(userRepository.existsUserByUsername(user.getUsername())){
+            return requestRepository.save(new Request(user, type, reasonsOfTheRequest, province));
+        }
+        return null;
     }
+
     public void manageRequest(Long requestId, RequestStatus requestStatus, Province province) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new RequestNotFoundException(requestId));
         User user = request.getUser();
 
         if (requestStatus == RequestStatus.APPROVED) {
-            approveRequest(request, user, province);
+            user = approveRequest(request, user, province);
+        } else {
+            denyRequest(request);
         }
 
         request.setStatus(requestStatus);
-        //In Java we can modify the parameters of an object in another function
-        //It is similar to referenced parameter in C++, so we can save only in the
-        //original method
         requestRepository.save(request);
-        userRepository.save(user);
+        userService.updateUser(user);
     }
 
-    private void approveRequest(Request request, User user, Province province) {
+    public User approveRequest(Request request, User user, Province province) {
         if (request.getType() == RequestType.TO_MODERATOR) {
-            approveModeratorRequest(user);
+            return approveModeratorRequest(user);
         } else {
-            approveProvinceRequest(user, province);
+            return approveProvinceRequest(user, province);
         }
     }
 
-    private void approveModeratorRequest(User user) {
+    public User approveModeratorRequest(User user) {
         user.setRole(Role.MODERATOR);
+        return user;
     }
 
-    private void approveProvinceRequest(User user, Province province) {
+    public User approveProvinceRequest(User user, Province province) {
         user.setProvince(province);
+        return user;
     }
 
-    private void denyRequest(Request request) {
+    public void denyRequest(Request request) {
         request.setStatus(RequestStatus.DENIED);
     }
 
-    public void deleteRequest(Request request) {
+    public void deleteRequest(Long requestId) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new RequestNotFoundException(requestId));
         requestRepository.delete(request);
     }
 
 
+    public boolean existsByUserAndType(User user, RequestType requestType) {
+        return requestRepository.existsByUserAndType(user, requestType);
+    }
+
+    public void save(Request request) {
+        requestRepository.save(request);
+    }
 }

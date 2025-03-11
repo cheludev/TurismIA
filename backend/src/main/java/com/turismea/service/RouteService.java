@@ -1,9 +1,7 @@
 package com.turismea.service;
 
+import com.turismea.exception.*;
 import com.turismea.exception.NotTheOwnerOfRouteException;
-import com.turismea.exception.NotTheOwnerOfRouteException;
-import com.turismea.exception.RouteNotFoundException;
-import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.City;
 import com.turismea.model.Route;
 import com.turismea.model.Tourist;
@@ -17,32 +15,22 @@ import java.util.List;
 @Service
 public class RouteService {
     private final RouteRepository routeRepository;
-    private final TouristRepository touristRepository;
-    private final CityRepository cityRepository;
+    private final TouristService touristService;
+    private final CityService cityService;
 
 
-    public RouteService(RouteRepository routeRepository, TouristRepository touristRepository, CityRepository cityRepository) {
+    public RouteService(RouteRepository routeRepository, TouristService touristService, CityService cityService) {
         this.routeRepository = routeRepository;
-        this.touristRepository = touristRepository;
-        this.cityRepository = cityRepository;
+
+        this.touristService = touristService;
+        this.cityService = cityService;
     }
 
     public RouteRepository getRouteRepository() {
         return routeRepository;
     }
 
-    public List<Route> saveRoute(Long touristId, Route route) {
-        Tourist tourist = touristRepository.findById(touristId)
-                .orElseThrow(() -> new UserNotFoundException(touristId));
 
-        route.setOwner(tourist);
-        tourist.getSavedRoutes().add(route);
-
-        routeRepository.save(route);
-        touristRepository.save(tourist);
-
-        return routeRepository.getRouteByOwner(tourist);
-    }
 
     public Route editRoute(Long originalRouteId, Route newRoute, Long touristId) {
         // Find the existing route by ID
@@ -66,15 +54,26 @@ public class RouteService {
         // Save the updated route
         return routeRepository.save(OGRoute);
     }
+    public List<Route> saveRoute(Long touristId, Route route) {
+        Tourist tourist = touristService.findById(touristId)
+                .orElseThrow(() -> new UserNotFoundException(touristId));
+
+        route.setOwner(tourist);
+
+        routeRepository.save(route);
+
+        return routeRepository.getRoutesByOwner(tourist);
+    }
+
 
     public List<Route> getSavedRoutes(Long touristId) {
-        Tourist tourist = touristRepository.findById(touristId)
+        Tourist tourist = touristService.findById(touristId)
                 .orElseThrow(() -> new UserNotFoundException(touristId));
         return routeRepository.getRouteByOwner(tourist);
     }
 
     public List<Route> getRoutesByCity(String city) {
-        City cityAux = cityRepository.findByName(city);
+        City cityAux = cityService.findByName(city).orElseThrow(() -> new CityNotFoundException(city));
         return routeRepository.getRoutesByCity(cityAux);
     }
 
@@ -95,5 +94,7 @@ public class RouteService {
         return routeRepository.findAll();
     }
 
-
+    public void delete(Route route) {
+        routeRepository.delete(route);
+    }
 }

@@ -1,13 +1,14 @@
+package com.turismea.service;
+
+import com.turismea.exception.AlreadyAppliedException;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.Request;
 import com.turismea.model.Tourist;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;
 import com.turismea.model.enumerations.Role;
-import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.RequestRepository;
 import com.turismea.repository.TouristRepository;
-import com.turismea.service.TouristService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -26,10 +27,10 @@ public class TouristServiceTest {
     private TouristRepository touristRepository;
 
     @Mock
-    private ModeratorRepository moderatorRepository;
+    private RequestRepository requestRepository;
 
     @Mock
-    private RequestRepository requestRepository;
+    private RequestService requestService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -64,24 +65,25 @@ public class TouristServiceTest {
         tourist.setEmail("new@email.com");
         tourist.setPassword("password123");
 
-        when(touristRepository.existsTouristByUsername(tourist.getUsername())).thenReturn(false);
-        when(touristRepository.existsTouristByEmail(tourist.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode(tourist.getPassword())).thenReturn("encodedPassword");
+        when(touristRepository.existsTouristByUsername(anyString())).thenReturn(false);
+        when(touristRepository.existsTouristByEmail(anyString())).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
-        Tourist savedTourist = new Tourist();
-        savedTourist.setUsername(tourist.getUsername());
-        savedTourist.setEmail(tourist.getEmail());
-        savedTourist.setPassword("encodedPassword");
-
-        when(touristRepository.save(any(Tourist.class))).thenReturn(savedTourist);
+        when(touristRepository.save(any(Tourist.class))).thenAnswer(invocation -> {
+            Tourist t = invocation.getArgument(0);
+            t.setRole(Role.TOURIST);
+            return t;
+        });
 
         Tourist result = touristService.registerTourist(tourist);
 
-        assertNotNull(result);
-        assertEquals("encodedPassword", result.getPassword());
-        assertEquals(Role.TOURIST, result.getRole());
+        assertNotNull(result, "The user should not be null");
+        assertEquals("encodedPassword", result.getPassword(), "The password should be encoded");
+        assertEquals(Role.TOURIST, result.getRole(), "The role should be TOURIST");
         verify(touristRepository).save(any(Tourist.class));
     }
+
+
 
     @Test
     void testApplyToModerator_UserExist_ItIsAlreadyAModerator() {
@@ -109,9 +111,6 @@ public class TouristServiceTest {
         Province province = Province.HUELVA;
 
         Tourist fakeTourist = new Tourist();
-        fakeTourist.setUsername("newUser");
-        fakeTourist.setEmail("new@email.com");
-        fakeTourist.setPassword("password123");
         fakeTourist.setId(id);
         fakeTourist.setRole(Role.TOURIST);
 
@@ -121,8 +120,9 @@ public class TouristServiceTest {
         boolean result = touristService.applyToModerator(id, province, "reasons");
 
         assertTrue(result);
-        verify(requestRepository).save(any(Request.class));
+        verify(requestService).save(any(Request.class));
     }
+
 
     @Test
     void testApplyToModerator_UserAlreadyApplied() {
@@ -134,13 +134,13 @@ public class TouristServiceTest {
         fakeTourist.setRole(Role.TOURIST);
 
         when(touristRepository.findById(id)).thenReturn(Optional.of(fakeTourist));
-        when(requestRepository.existsByUserAndType(fakeTourist, RequestType.TO_MODERATOR)).thenReturn(true);
+        when(requestService.existsByUserAndType(fakeTourist, RequestType.TO_MODERATOR)).thenReturn(true);
 
-        boolean result = touristService.applyToModerator(id, province, "reasons");
+        assertThrows(AlreadyAppliedException.class, () -> touristService.applyToModerator(id, province, "reasons"));
 
-        assertFalse(result); // ✅ Debe devolver false porque ya aplicó
-        verify(requestRepository, never()).save(any(Request.class)); // ✅ No debería guardar una nueva solicitud
+        verify(requestService, never()).save(any(Request.class));
     }
+
 
 
     @Test
@@ -185,6 +185,7 @@ public class TouristServiceTest {
         fakeTourist.setRole(Role.TOURIST);
 
         when(touristRepository.findById(id)).thenReturn(Optional.of(fakeTourist));
+        when(touristRepository.save(any(Tourist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Tourist infoTourist = new Tourist();
         infoTourist.setUsername("newUserEDITED");

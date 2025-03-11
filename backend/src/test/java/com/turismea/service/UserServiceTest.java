@@ -1,12 +1,12 @@
+package com.turismea.service;
+
 import com.turismea.model.User;
 import com.turismea.repository.UserRepository;
-import com.turismea.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -31,7 +31,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testLogIn_UserAlreadyExists_ReturnsNull() {
+    void testSignUp_UserAlreadyExists_ReturnsNull() {
         User user = new User();
         user.setUsername("existingUser");
         user.setEmail("existing@email.com");
@@ -39,14 +39,14 @@ class UserServiceTest {
 
         when(userRepository.existsUserByUsername(user.getUsername())).thenReturn(true);
 
-        User result = userService.logIn(user);
+        User result = userService.signUp(user);
         assertNull((result));
 
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void testLogIn_NewUser_SavesAndReturnsUser() {
+    void testSignUp_NewUser_SavesAndReturnsUser() {
         User user = new User();
         user.setUsername("newUser");
         user.setEmail("new@email.com");
@@ -56,7 +56,7 @@ class UserServiceTest {
         when(userRepository.existsUserByEmail(user.getEmail())).thenReturn(false);
         when(passwordEncoder.encode(user.getPassword())).thenReturn("encodedPassword");
 
-        User result = userService.logIn(user);
+        User result = userService.signUp(user);
 
         assertNotNull(result);
         assertEquals("encodedPassword", result.getPassword());
@@ -64,7 +64,7 @@ class UserServiceTest {
     }
 
     @Test
-    void testSignIn_CorrectCredentials_ReturnsUser() {
+    void testLogIn_CorrectCredentials_ReturnsUser() {
         User user = new User();
         user.setUsername("testUser");
         user.setPassword("encodedPassword");
@@ -72,14 +72,14 @@ class UserServiceTest {
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("rawPassword", "encodedPassword")).thenReturn(true);
 
-        User result = userService.signIn("testUser", "rawPassword");
+        User result = userService.logIn("testUser", "rawPassword");
 
         assertNotNull(result);
         assertEquals("testUser", result.getUsername());
     }
 
     @Test
-    void testSignIn_WrongPassword_ReturnsNull() {
+    void testLogIn_WrongPassword_ReturnsNull() {
         User user = new User();
         user.setUsername("testUser");
         user.setPassword("encodedPassword");
@@ -87,7 +87,7 @@ class UserServiceTest {
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
-        User result = userService.signIn("testUser", "wrongPassword");
+        User result = userService.logIn("testUser", "wrongPassword");
 
         assertNull(result);
     }

@@ -3,6 +3,7 @@ package com.turismea.model;
 import jakarta.persistence.*;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,6 +17,7 @@ public class Tourist extends User{
 
     public Tourist() {
         super();
+        savedRoutes = new ArrayList<>();
     }
 
     public List<Route> getSavedRoutes() { return savedRoutes; }

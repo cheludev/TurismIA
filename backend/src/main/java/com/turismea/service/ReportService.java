@@ -1,13 +1,12 @@
 package com.turismea.service;
 
 import com.turismea.exception.ReportNotFoundException;
-import com.turismea.model.Admin;
-import com.turismea.model.Report;
-import com.turismea.model.Route;
-import com.turismea.model.Tourist;
+import com.turismea.model.entity.Admin;
+import com.turismea.model.entity.Report;
+import com.turismea.model.entity.Route;
+import com.turismea.model.entity.Tourist;
 import com.turismea.model.enumerations.ReportAction;
 import com.turismea.model.enumerations.ReportType;
-import com.turismea.repository.AdminRepository;
 import com.turismea.repository.ReportRepository;
 import com.turismea.repository.RouteRepository;
 import org.springframework.stereotype.Service;

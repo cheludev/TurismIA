@@ -1,4 +1,4 @@
-package com.turismea.model;
+package com.turismea.model.entity;
 
 import com.turismea.model.enumerations.ReportType;
 import com.turismea.model.enumerations.RequestStatus;

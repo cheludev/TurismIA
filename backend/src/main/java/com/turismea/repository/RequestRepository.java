@@ -1,9 +1,7 @@
 package com.turismea.repository;
 
-import com.turismea.model.Report;
-import com.turismea.model.Request;
-import com.turismea.model.Tourist;
-import com.turismea.model.User;
+import com.turismea.model.entity.Request;
+import com.turismea.model.entity.User;
 import com.turismea.model.enumerations.RequestType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

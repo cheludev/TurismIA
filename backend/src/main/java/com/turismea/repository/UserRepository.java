@@ -1,6 +1,6 @@
 package com.turismea.repository;
 
-import com.turismea.model.User;
+import com.turismea.model.entity.User;
 import com.turismea.model.enumerations.Role;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;

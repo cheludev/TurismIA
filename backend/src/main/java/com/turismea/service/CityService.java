@@ -1,7 +1,7 @@
 package com.turismea.service;
 
 import com.turismea.exception.CityNotFoundException;
-import com.turismea.model.City;
+import com.turismea.model.entity.City;
 import com.turismea.repository.CityRepository;
 import org.springframework.stereotype.Service;
 

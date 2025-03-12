@@ -1,7 +1,7 @@
 package com.turismea.service;
 
 import com.turismea.exception.UserNotFoundException;
-import com.turismea.model.User;
+import com.turismea.model.entity.User;
 import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.TouristRepository;
 import com.turismea.repository.UserRepository;

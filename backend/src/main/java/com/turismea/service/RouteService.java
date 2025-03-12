@@ -2,12 +2,10 @@ package com.turismea.service;
 
 import com.turismea.exception.*;
 import com.turismea.exception.NotTheOwnerOfRouteException;
-import com.turismea.model.City;
-import com.turismea.model.Route;
-import com.turismea.model.Tourist;
-import com.turismea.repository.CityRepository;
+import com.turismea.model.entity.City;
+import com.turismea.model.entity.Route;
+import com.turismea.model.entity.Tourist;
 import com.turismea.repository.RouteRepository;
-import com.turismea.repository.TouristRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

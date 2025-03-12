@@ -1,7 +1,7 @@
 package com.turismea.security;
 
 import com.turismea.model.enumerations.Role;
-import com.turismea.model.User;
+import com.turismea.model.entity.User;
 import com.turismea.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

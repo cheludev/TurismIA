@@ -11,7 +11,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import com.turismea.exception.CityNotFoundException;
-import com.turismea.model.City;
+import com.turismea.model.entity.City;
 import com.turismea.repository.CityRepository;
 
 

@@ -1,6 +1,6 @@
 package com.turismea.service;
 
-import com.turismea.model.User;
+import com.turismea.model.entity.User;
 import com.turismea.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

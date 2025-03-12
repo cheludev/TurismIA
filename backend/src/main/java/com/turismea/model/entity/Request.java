@@ -1,4 +1,4 @@
-package com.turismea.model;
+package com.turismea.model.entity;
 
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;

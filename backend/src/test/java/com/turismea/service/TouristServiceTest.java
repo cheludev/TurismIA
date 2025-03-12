@@ -2,8 +2,8 @@ package com.turismea.service;
 
 import com.turismea.exception.AlreadyAppliedException;
 import com.turismea.exception.UserNotFoundException;
-import com.turismea.model.Request;
-import com.turismea.model.Tourist;
+import com.turismea.model.entity.Request;
+import com.turismea.model.entity.Tourist;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;
 import com.turismea.model.enumerations.Role;
@@ -140,7 +140,6 @@ public class TouristServiceTest {
 
         verify(requestService, never()).save(any(Request.class));
     }
-
 
 
     @Test

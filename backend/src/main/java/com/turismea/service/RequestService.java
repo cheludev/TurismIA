@@ -1,14 +1,14 @@
 package com.turismea.service;
 
 import com.turismea.exception.RequestNotFoundException;
-import com.turismea.model.*;
+import com.turismea.model.entity.Request;
+import com.turismea.model.entity.User;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;
 import com.turismea.model.enumerations.Role;
 import com.turismea.model.enumerations.RequestStatus;
 import com.turismea.repository.RequestRepository;
 import com.turismea.repository.UserRepository;
-import org.springframework.boot.Banner;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,7 +23,7 @@ public class RequestService {
         this.userService = userService;
     }
 
-    public Request createRequest(User user, RequestType type,  String reasonsOfTheRequest, Province province) {
+    public Request createRequest(User user, RequestType type, String reasonsOfTheRequest, Province province) {
         if(userRepository.existsUserByUsername(user.getUsername())){
             return requestRepository.save(new Request(user, type, reasonsOfTheRequest, province));
         }

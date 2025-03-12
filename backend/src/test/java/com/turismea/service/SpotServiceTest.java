@@ -1,7 +1,7 @@
 package com.turismea.service;
 
-import com.turismea.model.City;
-import com.turismea.model.Spot;
+import com.turismea.model.entity.City;
+import com.turismea.model.entity.Spot;
 import com.turismea.repository.SpotRepository;
 import com.turismea.exception.SpotNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,13 +34,30 @@ public class SpotServiceTest {
     @Test
     void testValidateSpot() {
         Spot spot = new Spot();
+        spot.setId(1L);
         spot.setValidated(false);
+
+        when(spotRepository.findById(1L)).thenReturn(Optional.of(spot));
 
         spotService.validateSpot(spot);
 
         assertTrue(spot.isValidated());
         verify(spotRepository).save(spot);
     }
+
+    @Test
+    void testValidateSpot_NotExist() {
+        Spot spot = new Spot();
+        spot.setId(1L);
+        spot.setValidated(false);
+
+        when(spotRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(SpotNotFoundException.class, () -> spotService.validateSpot(spot));
+
+        verify(spotRepository, never()).save(any(Spot.class));
+    }
+
 
     @Test
     void testNewTouristicSpot_SpotExists() {

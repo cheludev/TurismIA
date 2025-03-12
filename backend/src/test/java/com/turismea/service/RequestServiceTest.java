@@ -1,10 +1,10 @@
 package com.turismea.service;
 
 import com.turismea.exception.RequestNotFoundException;
-import com.turismea.model.Moderator;
-import com.turismea.model.Request;
-import com.turismea.model.Tourist;
-import com.turismea.model.User;
+import com.turismea.model.entity.Moderator;
+import com.turismea.model.entity.Request;
+import com.turismea.model.entity.Tourist;
+import com.turismea.model.entity.User;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestStatus;
 import com.turismea.model.enumerations.RequestType;

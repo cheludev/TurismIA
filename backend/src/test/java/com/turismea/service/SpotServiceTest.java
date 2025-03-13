@@ -1,14 +1,18 @@
 package com.turismea.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
+import com.turismea.repository.CityRepository;
 import com.turismea.repository.SpotRepository;
 import com.turismea.exception.SpotNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,8 +27,21 @@ public class SpotServiceTest {
     @Mock
     private SpotRepository spotRepository;
 
+    @Mock
+    private GoogleSpotService googleSpotService;
+
+    @Mock
+    private CityRepository cityRepository;
     @InjectMocks
     private SpotService spotService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private String mockJsonResponse = "{ \"places\": [" +
+            "{ \"displayName\": { \"text\": \"Museo de Huelva\" }, " +
+            "\"formattedAddress\": \"Huelva, España\", " +
+            "\"location\": { \"latitude\": 37.2583, \"longitude\": -6.9495 }, " +
+            "\"id\": \"ChIJr8h3sHtxEg0Rn1w9QhDys4E\" } ] }";
 
     @BeforeEach
     void setUp() {
@@ -133,5 +150,41 @@ public class SpotServiceTest {
         assertEquals(2, result.size());
 
         verify(spotRepository).getSpotByCity(fakeCity);
+    }
+
+
+
+
+
+    @Test
+    void testSaveCitySpots_Success() {
+        String city = "Huelva";
+        when(googleSpotService.getSpots(city)).thenReturn(Mono.just(mockJsonResponse));
+        when(cityRepository.findByName(city)).thenReturn(new City(city));
+
+        spotService.saveCitySpots(city);
+
+        ArgumentCaptor<Spot> captor = ArgumentCaptor.forClass(Spot.class);
+        verify(spotRepository, timeout(5000).times(1)).save(captor.capture());
+
+        Spot savedSpot = captor.getValue();
+
+        // Verifica que los datos se guardan correctamente
+        assertNotNull(savedSpot);
+        assertEquals("Museo de Huelva", savedSpot.getName());
+        assertEquals("Huelva, España", savedSpot.getAddress());
+        assertEquals(37.2583, savedSpot.getLatitude());
+        assertEquals(-6.9495, savedSpot.getLongitude());
+        assertEquals("ChIJr8h3sHtxEg0Rn1w9QhDys4E", savedSpot.getPlaceId());
+    }
+
+    @Test
+    void testSaveCitySpots_ErrorHandling() {
+        String city = "Huelva";
+        when(googleSpotService.getSpots(city)).thenReturn(Mono.just("INVALID_JSON"));
+
+        spotService.saveCitySpots(city);
+
+        verify(spotRepository, never()).save(any(Spot.class));
     }
 }

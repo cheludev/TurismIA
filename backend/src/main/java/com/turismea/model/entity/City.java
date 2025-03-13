@@ -2,6 +2,7 @@ package com.turismea.model.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -34,6 +35,14 @@ public class City {
         this.moderators = moderators;
         this.routes = routes;
     }
+
+    public City(String name) {
+        this.name = name;
+        this.spots = new ArrayList<>();
+        this.moderators = new ArrayList<>();
+        this.routes = new ArrayList<>();
+    }
+
 
     public City() {
 

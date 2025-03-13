@@ -1,8 +1,12 @@
 package com.turismea.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.exception.SpotNotFoundException;
+import com.turismea.model.dto.GooglePlacesResponse;
+import com.turismea.model.dto.Place;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
+import com.turismea.repository.CityRepository;
 import com.turismea.repository.SpotRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +16,13 @@ import java.util.List;
 public class SpotService {
 
     private final SpotRepository spotRepository;
-    private final GoogleMapsService googleMapsService;
+    private final GoogleSpotService googleSpotService;
+    private final CityRepository cityRepository;
 
-    public SpotService(SpotRepository spotRepository, GoogleMapsService googleMapsService) {
+    public SpotService(SpotRepository spotRepository, GoogleSpotService googleSpotService, CityRepository cityRepository) {
         this.spotRepository = spotRepository;
-        this.googleMapsService = googleMapsService;
+        this.googleSpotService = googleSpotService;
+        this.cityRepository = cityRepository;
     }
 
     public void validateSpot(Spot spot){
@@ -40,10 +46,32 @@ public class SpotService {
     }
 
     public void saveCitySpots(String city) {
-        googleMapsService.getSpots(city).subscribe(json -> {
+        googleSpotService.getSpots(city).subscribe(jsonResponse -> {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                GooglePlacesResponse response = objectMapper.readValue(jsonResponse, GooglePlacesResponse.class);
 
+                List<Place> places = response.getPlaces();
+                for (Place place : places) {
+                    Spot spot = new Spot();
+                    spot.setName(place.getName());
+                    spot.setAddress(place.getAddress());
+                    spot.setLatitude(place.getLatitude());
+                    spot.setLongitude(place.getLongitude());
+
+                    spot.setCity(cityRepository.findByName(city));
+
+                    spotRepository.save(spot);
+                }
+                System.out.println("Places were saved satisfactory in DB");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error processing JSON");
+            }
         });
     }
+
 
     public void deleteSpot(Spot spot){
         spotRepository.delete(spot);

@@ -31,17 +31,14 @@ public class RouteService {
 
 
     public Route editRoute(Long originalRouteId, Route newRoute, Long touristId) {
-        // Find the existing route by ID
         Route OGRoute = routeRepository.findById(originalRouteId)
                 .orElseThrow(() -> new RouteNotFoundException(originalRouteId));
 
-        // Check if the touristId is the owner of the route
         if (!OGRoute.getOwner().getId().equals(touristId)) {
             throw new NotTheOwnerOfRouteException(touristId, originalRouteId);
         }
 
 
-        // Update route properties
         OGRoute.setName(newRoute.getName());
         OGRoute.setCity(newRoute.getCity());
         OGRoute.setOwner(newRoute.getOwner());
@@ -49,7 +46,6 @@ public class RouteService {
         OGRoute.setSpots(newRoute.getSpots());
         OGRoute.setDescription(newRoute.getDescription());
 
-        // Save the updated route
         return routeRepository.save(OGRoute);
     }
     public List<Route> saveRoute(Long touristId, Route route) {

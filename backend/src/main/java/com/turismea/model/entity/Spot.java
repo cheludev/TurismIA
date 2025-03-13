@@ -15,6 +15,7 @@ public class Spot {
     @JoinColumn(name = "city_id")
     private City city;
 
+    private Long GoogleID;
     private String address;
     private Double latitude;
     private Double longitude;
@@ -138,4 +139,11 @@ public class Spot {
         this.id = id;
     }
 
+    public Long getGoogleID() {
+        return GoogleID;
+    }
+
+    public void setGoogleID(Long googleID) {
+        GoogleID = googleID;
+    }
 }

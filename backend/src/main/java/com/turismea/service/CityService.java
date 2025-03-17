@@ -27,4 +27,8 @@ public class CityService {
         return Optional.ofNullable(cityRepository.findByName(city));
     }
 
+    public City save(City city) {
+        return cityRepository.save(city);
+    }
+
 }

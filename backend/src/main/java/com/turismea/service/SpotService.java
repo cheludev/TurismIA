@@ -1,6 +1,7 @@
 package com.turismea.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.turismea.exception.CityNotFoundException;
 import com.turismea.exception.SpotNotFoundException;
 import com.turismea.model.dto.GooglePlacesResponse;
 import com.turismea.model.dto.Place;
@@ -10,19 +11,21 @@ import com.turismea.repository.CityRepository;
 import com.turismea.repository.SpotRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SpotService {
 
     private final SpotRepository spotRepository;
     private final GoogleSpotService googleSpotService;
-    private final CityRepository cityRepository;
+    private final CityService cityService;
 
-    public SpotService(SpotRepository spotRepository, GoogleSpotService googleSpotService, CityRepository cityRepository) {
+    public SpotService(SpotRepository spotRepository, GoogleSpotService googleSpotService, CityService cityService) {
         this.spotRepository = spotRepository;
         this.googleSpotService = googleSpotService;
-        this.cityRepository = cityRepository;
+        this.cityService = cityService;
     }
 
     public void validateSpot(Spot spot){
@@ -52,18 +55,33 @@ public class SpotService {
                 GooglePlacesResponse response = objectMapper.readValue(jsonResponse, GooglePlacesResponse.class);
 
                 List<Place> places = response.getPlaces();
-                for (Place place : places) {
-                    Spot spot = new Spot();
-                    spot.setName(place.getName());
-                    spot.setAddress(place.getAddress());
-                    spot.setLatitude(place.getLatitude());
-                    spot.setLongitude(place.getLongitude());
 
-                    spot.setCity(cityRepository.findByName(city));
-
-                    spotRepository.save(spot);
+                City cityEntity = new City();
+                if (!cityService.findByName(city).isPresent()) {
+                    cityEntity = cityService.save(new City(city));
                 }
-                System.out.println("Places were saved satisfactory in DB");
+                List<Spot> spots = new ArrayList<>();
+                for (Place place : places) {
+                    if(spotRepository.findByName(place.getName())==null) {
+                        Spot spot = new Spot(
+                                place.getName(),
+                                cityEntity,
+                                place.getFormattedAddress(),
+                                place.getLocation().getLatitude(),
+                                place.getLocation().getLongitude(),
+                                15, // Initial and standard time
+                                false,
+                                "",
+                                new ArrayList<>()
+                        );
+
+                        spots.add(spot);
+                    } else System.out.println("Spot " + place.getName() + " is already in the DB");
+                }
+
+                spotRepository.saveAll(spots);
+
+                System.out.println("Places were saved satisfactorily in DB");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -81,8 +99,20 @@ public class SpotService {
         return spotRepository.getSpotByValidatedAndCity(true, city);
     }
 
+    public List<Spot> getUnValidatedSpotByCity(City city) {
+        return spotRepository.getSpotByValidatedAndCity(false, city);
+    }
+
     public List<Spot> getAllSpotByCity(City city) {
         return spotRepository.getSpotByCity(city);
     }
+
+    public List<String> getDestinationSpots(Spot origin, List<Spot> destination) {
+        return destination.stream()
+                .filter(s -> !s.equals(origin))  //It only maintains the spots which not match with the origin
+                .map(Spot::getName)  // Extract the names
+                .collect(Collectors.toList()); // Convert to a list
+    }
+
 
 }

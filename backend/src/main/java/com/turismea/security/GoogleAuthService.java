@@ -21,26 +21,27 @@ public class GoogleAuthService {
 
     private final WebClient webClient = WebClient.create("https://oauth2.googleapis.com");
 
-    public String obtenerAccessToken() {
+    public Mono<String> getAccessToken() {
         String requestBody = "client_id=" + clientId +
                 "&client_secret=" + clientSecret +
                 "&refresh_token=" + refreshToken +
                 "&grant_type=refresh_token";
 
-        Mono<String> response = webClient.post()
+        return webClient.post()
                 .uri("/token")
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(String.class);
-
-        try {
-            String jsonResponse = response.block();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-            return jsonNode.get("access_token").asText();
-        } catch (Exception e) {
-            throw new RuntimeException("Error obteniendo el access token", e);
-        }
+                .bodyToMono(String.class)
+                .flatMap(jsonResponse -> {
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonNode jsonNode = objectMapper.readTree(jsonResponse);
+                        return Mono.just(jsonNode.get("access_token").asText());
+                    } catch (Exception e) {
+                        return Mono.error(new RuntimeException("Error obteniendo el access token", e));
+                    }
+                });
     }
+
 }

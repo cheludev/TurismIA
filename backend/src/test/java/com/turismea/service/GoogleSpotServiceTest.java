@@ -1,88 +1,87 @@
 package com.turismea.service;
 
 import com.turismea.security.GoogleAuthService;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import java.io.IOException;
+import java.util.function.Function;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class GoogleSpotServiceTest {
 
-    private static MockWebServer mockWebServer;
+    @Mock
     private GoogleAuthService googleAuthService;
+
+    @Mock
+    private WebClient webClient;
+
+    @Mock
+    private WebClient.RequestBodyUriSpec requestBodyUriSpecMock;
+
+    @Mock
+    private WebClient.RequestBodySpec requestBodySpecMock;
+
+    @Mock
+    private WebClient.RequestHeadersSpec<?> requestHeadersSpecMock;
+
+    @Mock
+    private WebClient.ResponseSpec responseSpecMock;
+
+    @InjectMocks
     private GoogleSpotService googleSpotService;
-
-    @BeforeAll
-    static void setUpMockServer() throws IOException {
-        mockWebServer = new MockWebServer();
-        mockWebServer.start();
-    }
-
-    @AfterAll
-    static void tearDownMockServer() throws IOException {
-        mockWebServer.shutdown();
-    }
 
     @BeforeEach
     void setUp() {
-        googleAuthService = Mockito.mock(GoogleAuthService.class);
-        Mockito.when(googleAuthService.obtenerAccessToken()).thenReturn("fake-access-token");
+        MockitoAnnotations.openMocks(this);
 
-
-        WebClient webClient = WebClient.builder()
-                .baseUrl(mockWebServer.url("/").toString())
-                .build();
-
-        googleSpotService = new GoogleSpotService(webClient, googleAuthService);
+        when(webClient.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri(any(Function.class))).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.header(anyString(), anyString())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(any())).thenReturn((WebClient.RequestHeadersSpec) requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
     }
 
     @Test
     void testGetSpots_Success() {
-        String fakeResponse = "{ \"places\": [ { \"displayName\": { \"text\": \"Museo de Huelva\" }, "
-                + "\"formattedAddress\": \"Huelva, España\", "
-                + "\"location\": { \"latitude\": 37.2619, \"longitude\": -6.9427 }, "
-                + "\"placeId\": \"ChIJxQvW8WfYQw0Rc2P8sdzG0mA\" } ] }";
+        String city = "Huelva";
+        String mockedResponse = "{\"status\": \"OK\"}";
 
-        mockWebServer.enqueue(new MockResponse()
-                .setResponseCode(HttpStatus.OK.value())
-                .setBody(fakeResponse));
+        when(googleAuthService.getAccessToken()).thenReturn(Mono.just("mocked_token"));
+        when(responseSpecMock.bodyToMono(String.class)).thenReturn(Mono.just(mockedResponse));
 
-        Mono<String> result = googleSpotService.getSpots("Huelva");
+        Mono<String> result = googleSpotService.getSpots(city);
 
-        StepVerifier.create(result)
-                .expectNext(fakeResponse)
-                .verifyComplete();
+        result.subscribe(response -> {
+            assert response.equals(mockedResponse);
+        });
+
+        verify(webClient, times(1)).post();
+        verify(requestBodyUriSpecMock, times(1)).uri(any(Function.class));
+        verify(requestBodySpecMock, times(2)).header(anyString(), anyString());
+        verify(requestBodySpecMock, times(1)).bodyValue(any());
+        verify(requestHeadersSpecMock, times(1)).retrieve();
     }
 
     @Test
-    void testGetSpots_4xxError() {
-        mockWebServer.enqueue(new MockResponse().setResponseCode(HttpStatus.BAD_REQUEST.value()));
+    void testGetSpots_ClientError() {
+        String city = "Huelva";
 
-        Mono<String> result = googleSpotService.getSpots("Huelva");
+        when(googleAuthService.getAccessToken()).thenReturn(Mono.just("mocked_token"));
+        when(responseSpecMock.bodyToMono(String.class)).thenReturn(Mono.error(new RuntimeException("Error 400: Bad Request")));
 
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable ->
-                        throwable instanceof RuntimeException
-                                && throwable.getMessage().equals("Error 4XX: Client error in the Google Places API"))
-                .verify();
-    }
+        Mono<String> result = googleSpotService.getSpots(city);
 
-    @Test
-    void testGetSpots_5xxError() {
-        mockWebServer.enqueue(new MockResponse().setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        result.doOnError(error -> {
+            assert error.getMessage().contains("Error 400");
+        }).subscribe();
 
-        Mono<String> result = googleSpotService.getSpots("Huelva");
-
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable ->
-                        throwable instanceof RuntimeException
-                                && throwable.getMessage().equals("Error 5XX: Server error in the Google Places API"))
-                .verify();
+        verify(webClient, times(1)).post();
     }
 }

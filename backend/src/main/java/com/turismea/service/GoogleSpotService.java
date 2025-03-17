@@ -18,33 +18,36 @@ public class GoogleSpotService {
         this.googleAuthService = googleAuthService;
     }
 
-    public Mono<String> getSpots(String ciudad) {
-        String ACCESS_TOKEN = googleAuthService.obtenerAccessToken();
+    public Mono<String> getSpots(String city) {
+        return googleAuthService.getAccessToken()
+                .flatMap(accessToken -> {
+                    // JSON del cuerpo de la solicitud
+                    String requestBody = "{"
+                            + "\"textQuery\": \"touristic attraction in " + city + "capital España\","
+                            + "\"regionCode\": \"ES\","
+                            + "\"languageCode\": \"es\""
+                            + "}";
 
-        String requestBody = "{"
-                + "\"textQuery\": \"" + ciudad + "\""
-                + "}";
-
-        return webClient.post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/places:searchText")
-                        .queryParam("fields","*")
-                        .build()
-                )
-                .header("Authorization", "Bearer " + ACCESS_TOKEN)
-                .header("Content-Type", "application/json")
-                .bodyValue(requestBody)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, response -> {
-                    if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
-                        return Mono.error(new RuntimeException("Error 401: Invalid access token"));
-                    }
-                    return Mono.error(new RuntimeException("Error 4XX: Client error in the Google Places API"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, response ->
-                        Mono.error(new RuntimeException("Error 5XX: Server error in the Google Places API"))
-                )
-                .bodyToMono(String.class);
+                    return webClient.post()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/places:searchText")
+                                    .queryParam("fields", "places.displayName,places.formattedAddress,places.location,places.types")
+                                    .build()
+                            )
+                            .header("Authorization", "Bearer " + accessToken)
+                            .header("Content-Type", "application/json")
+                            .bodyValue(requestBody)
+                            .retrieve()
+                            .onStatus(HttpStatusCode::is4xxClientError, response -> {
+                                return response.bodyToMono(String.class)
+                                        .flatMap(errorBody -> Mono.error(new RuntimeException("Error 4XX: " + errorBody)));
+                            })
+                            .onStatus(HttpStatusCode::is5xxServerError, response ->
+                                    Mono.error(new RuntimeException("Error 5XX: Server error in the Google Places API"))
+                            )
+                            .bodyToMono(String.class);
+                });
     }
-}
 
+
+}

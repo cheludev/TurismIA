@@ -1,7 +1,7 @@
 package com.turismea.model.entity;
 
+import com.turismea.model.dto.Location;
 import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
@@ -15,11 +15,9 @@ public class Spot {
     @JoinColumn(name = "city_id")
     private City city;
 
-    private Long GoogleID;
     private String address;
     private Double latitude;
     private Double longitude;
-    private String placeId;
 
     private int averageTime;
     private boolean validated;
@@ -33,14 +31,15 @@ public class Spot {
     private List<Route> routes;
 
     public Spot(String name, City city, String address, Double latitude,
-                Double longitude, String placeId, int averageTime, boolean validated,
+                Double longitude, int averageTime, boolean validated,
                 String info, List<Route> routes) {
+
+
         this.name = name;
         this.city = city;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.placeId = placeId;
         this.averageTime = averageTime;
         this.validated = validated;
         this.info = info;
@@ -83,13 +82,6 @@ public class Spot {
         this.averageTime = averageTime;
     }
 
-    public String getPlaceId() {
-        return placeId;
-    }
-
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
-    }
 
     public Double getLongitude() {
         return longitude;
@@ -139,11 +131,5 @@ public class Spot {
         this.id = id;
     }
 
-    public Long getGoogleID() {
-        return GoogleID;
-    }
 
-    public void setGoogleID(Long googleID) {
-        GoogleID = googleID;
-    }
 }

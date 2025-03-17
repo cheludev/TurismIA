@@ -68,7 +68,7 @@ class CityServiceTest {
 
         when(cityRepository.findByName(cityName)).thenReturn(city);
 
-        City foundCity = cityService.findByName(cityName).orElseThrow(() -> new CityNotFoundException(city.getId()));
+        City foundCity = cityService.findByName(cityName).orElseThrow();
 
         assertNotNull(foundCity);
         assertEquals(cityName, foundCity.getName());

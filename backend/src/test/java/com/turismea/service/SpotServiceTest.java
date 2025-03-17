@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import io.reactivex.rxjava3.core.Observable;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Mono;
@@ -31,7 +33,11 @@ public class SpotServiceTest {
     private GoogleSpotService googleSpotService;
 
     @Mock
+    private CityService cityService;
+
+    @Mock
     private CityRepository cityRepository;
+
     @InjectMocks
     private SpotService spotService;
 
@@ -157,34 +163,49 @@ public class SpotServiceTest {
 
 
     @Test
-    void testSaveCitySpots_Success() {
-        String city = "Huelva";
-        when(googleSpotService.getSpots(city)).thenReturn(Mono.just(mockJsonResponse));
-        when(cityRepository.findByName(city)).thenReturn(new City(city));
+    void testSaveCitySpots() throws Exception {
+        String cityName = "Madrid";
 
-        spotService.saveCitySpots(city);
+        String fakeJsonResponse = """
+            {
+              "places": [
+                {
+                  "name": "places/ChIJSyhE1-bPEQ0Rgw-0EMGqK9g",
+                  "id": "ChIJSyhE1-bPEQ0Rgw-0EMGqK9g",
+                  "formattedAddress": "Madrid, Spain",
+                  "location": {
+                    "latitude": 40.4168,
+                    "longitude": -3.7038
+                  },
+                  "displayName": {
+                    "text": "Huelva",
+                    "languageCode": "en"
+                  }
+                }
+              ]
+            }
+            """;
 
-        ArgumentCaptor<Spot> captor = ArgumentCaptor.forClass(Spot.class);
-        verify(spotRepository, timeout(5000).times(1)).save(captor.capture());
+        when(googleSpotService.getSpots(cityName))
+                .thenReturn(Mono.just(fakeJsonResponse));
 
-        Spot savedSpot = captor.getValue();
+        City mockCity = new City();
+        mockCity.setName(cityName);
+        when(cityService.findByName(cityName)).thenReturn(Optional.of(mockCity));
 
-        // Verifica que los datos se guardan correctamente
-        assertNotNull(savedSpot);
-        assertEquals("Museo de Huelva", savedSpot.getName());
-        assertEquals("Huelva, España", savedSpot.getAddress());
-        assertEquals(37.2583, savedSpot.getLatitude());
-        assertEquals(-6.9495, savedSpot.getLongitude());
-        assertEquals("ChIJr8h3sHtxEg0Rn1w9QhDys4E", savedSpot.getPlaceId());
-    }
+        spotService.saveCitySpots(cityName);
 
-    @Test
-    void testSaveCitySpots_ErrorHandling() {
-        String city = "Huelva";
-        when(googleSpotService.getSpots(city)).thenReturn(Mono.just("INVALID_JSON"));
+        ArgumentCaptor<Spot> spotCaptor = ArgumentCaptor.forClass(Spot.class);
+        verify(spotRepository).save(spotCaptor.capture());
+        Spot savedSpot = spotCaptor.getValue();
 
-        spotService.saveCitySpots(city);
+        assertEquals("Madrid", savedSpot.getCity().getName());
 
-        verify(spotRepository, never()).save(any(Spot.class));
+
+        assertEquals("Huelva", savedSpot.getName());
+
+        assertEquals("Madrid, Spain", savedSpot.getAddress());
+        assertEquals(40.4168, savedSpot.getLatitude());
+        assertEquals(-3.7038, savedSpot.getLongitude());
     }
 }

@@ -12,4 +12,6 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
     List<Spot> findByCity(City city);
     List<Spot> getSpotByCity(City city);
     List<Spot> getSpotByValidatedAndCity(boolean validated, City city);
+
+    Spot findByName(String name);
 }

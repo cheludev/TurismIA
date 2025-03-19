@@ -9,6 +9,7 @@ import com.turismea.repository.RouteRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RouteService {
@@ -67,8 +68,8 @@ public class RouteService {
     }
 
     public List<Route> getRoutesByCity(String city) {
-        City cityAux = cityService.findByName(city).orElseThrow(() -> new CityNotFoundException(city));
-        return routeRepository.getRoutesByCity(cityAux);
+        Optional<City> cityAux = cityService.findByName(city).orElseThrow(() -> new CityNotFoundException(city));
+        return routeRepository.getRoutesByCity(cityAux.orElseGet(() -> cityService.existOrCreateCity(city)));
     }
 
     public List<Route> getRoutesByOwner(Long ownerId) {

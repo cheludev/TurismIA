@@ -168,7 +168,7 @@ public class RouteServiceTest {
         Route route1 = new Route();
         Route route2 = new Route();
 
-        when(cityService.findByName(cityName)).thenReturn(Optional.of(fakeCity));
+        when(cityService.findByName(cityName)).thenReturn(Optional.of(Optional.of(fakeCity)));
         when(routeRepository.getRoutesByCity(fakeCity)).thenReturn(Arrays.asList(route1, route2));
 
         List<Route> routes = routeService.getRoutesByCity(cityName);

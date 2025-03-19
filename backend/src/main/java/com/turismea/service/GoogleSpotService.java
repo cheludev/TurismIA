@@ -21,9 +21,8 @@ public class GoogleSpotService {
     public Mono<String> getSpots(String city) {
         return googleAuthService.getAccessToken()
                 .flatMap(accessToken -> {
-                    // JSON del cuerpo de la solicitud
                     String requestBody = "{"
-                            + "\"textQuery\": \"touristic attraction in " + city + "capital España\","
+                            + "\"textQuery\": \"touristic points in " + city + "capital España\","
                             + "\"regionCode\": \"ES\","
                             + "\"languageCode\": \"es\""
                             + "}";

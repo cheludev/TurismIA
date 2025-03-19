@@ -14,4 +14,11 @@ public class WebClientConfig {
         return builder.baseUrl(baseUrl).build();
     }
 
+    String URL = "https://routes.googleapis.com/distanceMatrix/";
+
+    @Bean
+    public WebClient webClient2(){
+        return WebClient.builder().baseUrl(URL).build();
+    }
+
 }

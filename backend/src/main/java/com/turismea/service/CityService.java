@@ -23,12 +23,17 @@ public class CityService {
         cityRepository.delete(city);
     }
 
-    public Optional<City> findByName(String city) {
+    public Optional<Optional<City>> findByName(String city) {
         return Optional.ofNullable(cityRepository.findByName(city));
     }
 
     public City save(City city) {
         return cityRepository.save(city);
+    }
+
+    public City existOrCreateCity(String city) {
+        return cityRepository.findByName(city)
+                .orElseGet(() -> cityRepository.save(new City(city)));
     }
 
 }

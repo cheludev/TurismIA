@@ -1,4 +1,4 @@
-package com.turismea.model.dto;
+package com.turismea.model.dto.placesDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

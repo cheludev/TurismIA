@@ -10,13 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class GoogleAuthService {
 
-    @Value("${google.oauth.client-id}")
+    @Value("${google.oauth.client-id}") //${google.oauth.client-id}
     private String clientId;
 
-    @Value("${google.oauth.client-secret}")
+    @Value("${google.oauth.client-secret}")//${google.oauth.client-secret}
     private String clientSecret;
 
-    @Value("${google.oauth.refresh-token}")
+    @Value("${google.oauth.refresh-token}")//${google.oauth.refresh-token}
     private String refreshToken;
 
     private final WebClient webClient = WebClient.create("https://oauth2.googleapis.com");

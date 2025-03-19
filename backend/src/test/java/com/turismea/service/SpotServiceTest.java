@@ -191,13 +191,22 @@ public class SpotServiceTest {
 
         City mockCity = new City();
         mockCity.setName(cityName);
-        when(cityService.findByName(cityName)).thenReturn(Optional.of(mockCity));
+        when(cityService.findByName(cityName)).thenReturn(Optional.of(Optional.of(mockCity)));
 
         spotService.saveCitySpots(cityName);
 
-        ArgumentCaptor<Spot> spotCaptor = ArgumentCaptor.forClass(Spot.class);
-        verify(spotRepository).save(spotCaptor.capture());
-        Spot savedSpot = spotCaptor.getValue();
+        ArgumentCaptor<List<Spot>> spotCaptor = ArgumentCaptor.forClass(List.class);
+        verify(spotRepository).saveAll(spotCaptor.capture());
+        List<Spot> savedSpots = spotCaptor.getValue();
+
+        assertEquals(1, savedSpots.size()); // Asegurar que se guardó 1 Spot
+        Spot savedSpot = savedSpots.get(0); // Obtener el único Spot guardado
+
+        assertEquals("Madrid", savedSpot.getCity().getName());
+        assertEquals("Huelva", savedSpot.getName());
+        assertEquals("Madrid, Spain", savedSpot.getAddress());
+        assertEquals(40.4168, savedSpot.getLatitude());
+        assertEquals(-3.7038, savedSpot.getLongitude());
 
         assertEquals("Madrid", savedSpot.getCity().getName());
 

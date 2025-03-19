@@ -1,6 +1,5 @@
 package com.turismea.model.entity;
 
-import com.turismea.model.dto.Location;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class Spot {
     @ManyToOne
     @JoinColumn(name = "city_id")
     private City city;
-
+    private int googleIndex;
     private String address;
     private Double latitude;
     private Double longitude;
@@ -82,6 +81,13 @@ public class Spot {
         this.averageTime = averageTime;
     }
 
+    public int getGoogleIndex() {
+        return googleIndex;
+    }
+
+    public void setGoogleIndex(int googleIndex) {
+        this.googleIndex = googleIndex;
+    }
 
     public Double getLongitude() {
         return longitude;

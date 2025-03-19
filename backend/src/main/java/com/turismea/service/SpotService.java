@@ -1,15 +1,16 @@
 package com.turismea.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.turismea.exception.CityNotFoundException;
 import com.turismea.exception.SpotNotFoundException;
-import com.turismea.model.dto.GooglePlacesResponse;
-import com.turismea.model.dto.Place;
+import com.turismea.model.dto.placesDTO.GooglePlacesResponse;
+import com.turismea.model.dto.placesDTO.Place;
+import com.turismea.model.dto.routesDTO.WayPoint;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
-import com.turismea.repository.CityRepository;
 import com.turismea.repository.SpotRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,49 +48,47 @@ public class SpotService {
         spot.setInfo(touristicInfo);
         return spot;
     }
-
     public void saveCitySpots(String city) {
-        googleSpotService.getSpots(city).subscribe(jsonResponse -> {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                GooglePlacesResponse response = objectMapper.readValue(jsonResponse, GooglePlacesResponse.class);
+        googleSpotService.getSpots(city)
+                .flatMap(jsonResponse -> {
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        GooglePlacesResponse response = objectMapper.readValue(jsonResponse, GooglePlacesResponse.class);
+                        List<Place> places = response.getPlaces();
 
-                List<Place> places = response.getPlaces();
+                        City cityEntity = cityService.existOrCreateCity(city);
 
-                City cityEntity = new City();
-                if (!cityService.findByName(city).isPresent()) {
-                    cityEntity = cityService.save(new City(city));
-                }
-                List<Spot> spots = new ArrayList<>();
-                for (Place place : places) {
-                    if(spotRepository.findByName(place.getName())==null) {
-                        Spot spot = new Spot(
-                                place.getName(),
-                                cityEntity,
-                                place.getFormattedAddress(),
-                                place.getLocation().getLatitude(),
-                                place.getLocation().getLongitude(),
-                                15, // Initial and standard time
-                                false,
-                                "",
-                                new ArrayList<>()
-                        );
+                        List<String> existingNames = spotRepository.findAllNames();
 
-                        spots.add(spot);
-                    } else System.out.println("Spot " + place.getName() + " is already in the DB");
-                }
+                        List<Spot> spots = places.stream()
+                                .filter(place -> !existingNames.contains(place.getName()))
+                                .map(place -> new Spot(
+                                        place.getName(),
+                                        cityEntity,
+                                        place.getFormattedAddress(),
+                                        place.getLocation().getLatitude(),
+                                        place.getLocation().getLongitude(),
+                                        15,
+                                        false,
+                                        "",
+                                        new ArrayList<>()
+                                ))
+                                .collect(Collectors.toList());
 
-                spotRepository.saveAll(spots);
+                        if (!spots.isEmpty()) {
+                            spotRepository.saveAll(spots);
+                            System.out.println("Places were saved satisfactorily in DB");
+                        } else {
+                            System.out.println("No new spots to save");
+                        }
 
-                System.out.println("Places were saved satisfactorily in DB");
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Error processing JSON");
-            }
-        });
+                        return Mono.just(spots);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return Mono.error(new RuntimeException("Error processing JSON", e));
+                    }
+                });
     }
-
 
     public void deleteSpot(Spot spot){
         spotRepository.delete(spot);
@@ -107,12 +106,20 @@ public class SpotService {
         return spotRepository.getSpotByCity(city);
     }
 
-    public List<String> getDestinationSpots(Spot origin, List<Spot> destination) {
-        return destination.stream()
-                .filter(s -> !s.equals(origin))  //It only maintains the spots which not match with the origin
-                .map(Spot::getName)  // Extract the names
-                .collect(Collectors.toList()); // Convert to a list
+    public Flux<WayPoint> getDestinationSpots(WayPoint origin, Flux<WayPoint> wayPointFlux) {
+        Mono<List<WayPoint>> list = wayPointFlux.collectList();
+        return list.flatMapMany(list1 -> {
+            int originIndex = list1.indexOf(origin);
+            return Flux.fromIterable(
+                    list1.stream()
+                            .filter(spot -> list1.indexOf(spot) > originIndex)
+                            .toList()
+            );
+        });
     }
 
 
+    public List<Spot> getAllSpots() {
+        return spotRepository.findAll();
+    }
 }

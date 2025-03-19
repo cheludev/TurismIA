@@ -66,12 +66,12 @@ class CityServiceTest {
         City city = new City();
         city.setName(cityName);
 
-        when(cityRepository.findByName(cityName)).thenReturn(city);
+        when(cityRepository.findByName(cityName)).thenReturn(Optional.of(city));
 
-        City foundCity = cityService.findByName(cityName).orElseThrow();
+        Optional<City> foundCity = cityService.findByName(cityName).orElseThrow();
 
         assertNotNull(foundCity);
-        assertEquals(cityName, foundCity.getName());
+        assertEquals(cityName, foundCity.orElseGet(() -> cityService.existOrCreateCity(cityName)));
         verify(cityRepository).findByName(cityName);
     }
 }

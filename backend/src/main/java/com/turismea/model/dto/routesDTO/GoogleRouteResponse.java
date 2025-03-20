@@ -4,13 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleRouteResponse {
-
     private int originIndex;
     private int destinationIndex;
-    private int distanceMeters;
-    private Status status;
+    private Integer distanceMeters;
     private String duration;
     private String condition;
+    // Se puede incluir un campo de status según se necesite
+    private Status status;
+
+    public GoogleRouteResponse() {
+    }
 
     public GoogleRouteResponse(int originIndex, int destinationIndex, int distanceMeters, Status status, String duration, String condition) {
         this.originIndex = originIndex;
@@ -37,20 +40,12 @@ public class GoogleRouteResponse {
         this.destinationIndex = destinationIndex;
     }
 
-    public int getDistanceMeters() {
+    public Integer getDistanceMeters() {
         return distanceMeters;
     }
 
-    public void setDistanceMeters(int distanceMeters) {
+    public void setDistanceMeters(Integer distanceMeters) {
         this.distanceMeters = distanceMeters;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public String getDuration() {
@@ -67,5 +62,13 @@ public class GoogleRouteResponse {
 
     public void setCondition(String condition) {
         this.condition = condition;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

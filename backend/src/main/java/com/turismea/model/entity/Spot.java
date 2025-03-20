@@ -1,6 +1,8 @@
 package com.turismea.model.entity;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -48,6 +50,21 @@ public class Spot {
     public Spot() {
 
     }
+
+    public Spot(Spot spot) {
+        this.id = spot.getId();
+        this.name = spot.getName();
+        this.city = spot.getCity();
+        this.googleIndex = spot.getGoogleIndex();
+        this.address = spot.getAddress();
+        this.latitude = spot.getLatitude();
+        this.longitude = spot.getLongitude();
+        this.averageTime = spot.getAverageTime();
+        this.validated = spot.isValidated();
+        this.info = spot.getInfo();
+        this.routes = new ArrayList<>(spot.getRoutes()); // Copia la lista para evitar modificaciones accidentales
+    }
+
 
     public List<Route> getRoutes() {
         return routes;

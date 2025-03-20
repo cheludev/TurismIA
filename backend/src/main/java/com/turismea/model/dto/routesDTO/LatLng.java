@@ -1,27 +1,20 @@
 package com.turismea.model.dto.routesDTO;
 
 public class LatLng {
-    private Double latitude;
-    private Double longitude;
+    private Coordinates latLng;
 
-    public LatLng(Double latitude, Double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public LatLng() {
     }
 
-    public Double getLatitude() {
-        return latitude;
+    public LatLng(Coordinates latLng) {
+        this.latLng = latLng;
     }
 
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
+    public Coordinates getLatLng() {
+        return latLng;
     }
 
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
+    public void setLatLng(Coordinates latLng) {
+        this.latLng = latLng;
     }
 }

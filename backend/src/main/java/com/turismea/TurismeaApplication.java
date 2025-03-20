@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -25,21 +26,27 @@ public class TurismeaApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        System.out.println("========== Cargando todos los spots desde la BD ==========");
+        System.out.println("========== Loading all spots from DB ==========");
 
         List<Spot> spots = spotService.getAllSpots();
 
         if (spots.isEmpty()) {
-            System.out.println("No hay spots en la base de datos.");
+            System.out.println("No spots found in the database.");
         } else {
-            System.out.println("Total de spots en la BD: " + spots.size());
+            System.out.println("Total spots in the database: " + spots.size());
             for (Spot spot : spots) {
                 System.out.println(" - " + spot.getName() + " (" + spot.getLatitude() + ", " + spot.getLongitude() + ")");
             }
 
-            System.out.println("========== Creando distancias entre spots ==========");
-            cityDistanceService.createCityDistances(spots);
-            System.out.println("Proceso de cálculo de distancias finalizado.");
+            System.out.println("========== Creating distances between spots ==========");
+
+            // Call the sequential distance calculation method
+            Mono<Void> distanceCalculationProcess = cityDistanceService.getDistanceMatrixSequential(spots);
+
+            // Block to wait for completion since it's a reactive process in a non-reactive main method
+            distanceCalculationProcess.block();
+
+            System.out.println("Distance calculation process completed.");
         }
     }
 }

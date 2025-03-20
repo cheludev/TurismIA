@@ -1,20 +1,20 @@
 package com.turismea.model.dto.routesDTO;
 
-import com.turismea.model.dto.placesDTO.Location;
-
 public class LocationWayPoint {
+    private LatLng location;
 
-    private LatLng latLng;
+    public LocationWayPoint() {
+    }
 
     public LocationWayPoint(LatLng latLng) {
-        this.latLng = latLng;
+        this.location = latLng;
     }
 
-    public LatLng getLatLng() {
-        return latLng;
+    public LatLng getLocation() {
+        return location;
     }
 
-    public void setLatLng(LatLng latLng) {
-        this.latLng = latLng;
+    public void setLocation(LatLng location) {
+        this.location = location;
     }
 }

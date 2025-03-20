@@ -1,6 +1,7 @@
 package com.turismea.service;
 
 import com.turismea.security.GoogleAuthService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ public class GoogleSpotService {
     private final WebClient webClient;
     private final GoogleAuthService googleAuthService;
 
-    public GoogleSpotService(WebClient webClient, GoogleAuthService googleAuthService) {
+    public GoogleSpotService(@Qualifier("placesWebClient") WebClient webClient, GoogleAuthService googleAuthService) {
         this.webClient = webClient;
         this.googleAuthService = googleAuthService;
     }

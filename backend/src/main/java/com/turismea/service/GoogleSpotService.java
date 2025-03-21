@@ -30,7 +30,7 @@ public class GoogleSpotService {
 
                     return webClient.post()
                             .uri(uriBuilder -> uriBuilder
-                                    .path("/places:searchText")
+                                    .path("/v1/places:searchText")
                                     .queryParam("fields", "places.displayName,places.formattedAddress,places.location,places.types")
                                     .build()
                             )

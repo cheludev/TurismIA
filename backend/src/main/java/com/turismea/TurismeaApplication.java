@@ -1,7 +1,9 @@
 package com.turismea;
 
+import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
 import com.turismea.service.CityDistanceService;
+import com.turismea.service.CityService;
 import com.turismea.service.SpotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -19,6 +21,8 @@ public class TurismeaApplication implements CommandLineRunner {
 
     @Autowired
     private CityDistanceService cityDistanceService;
+    @Autowired
+    private CityService cityService;
 
     public static void main(String[] args) {
         SpringApplication.run(TurismeaApplication.class, args);
@@ -28,6 +32,7 @@ public class TurismeaApplication implements CommandLineRunner {
     public void run(String... args) {
         System.out.println("========== Loading all spots from DB ==========");
 
+        spotService.saveCitySpots("Huelva").block();
         List<Spot> spots = spotService.getAllSpots();
 
         if (spots.isEmpty()) {

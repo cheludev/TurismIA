@@ -6,22 +6,16 @@ public class RouteRequestDTO {
     private List<Waypoint> origins;
     private List<Waypoint> destinations;
     private String travelMode;
-    private String routingPreference;
 
-    // Constructor que asigna valores por defecto para travelMode y routingPreference
     public RouteRequestDTO(List<Waypoint> origins, List<Waypoint> destinations) {
         this.origins = origins;
         this.destinations = destinations;
-        this.travelMode = "DRIVE";
-        this.routingPreference = "TRAFFIC_AWARE";
+        this.travelMode = "WALK";
     }
-
-    // Constructor completo (si fuera necesario cambiar los valores por defecto)
-    public RouteRequestDTO(List<Waypoint> origins, List<Waypoint> destinations, String travelMode, String routingPreference) {
+    public RouteRequestDTO(List<Waypoint> origins, List<Waypoint> destinations, String travelMode) {
         this.origins = origins;
         this.destinations = destinations;
         this.travelMode = travelMode;
-        this.routingPreference = routingPreference;
     }
 
     public List<Waypoint> getOrigins() {
@@ -48,11 +42,4 @@ public class RouteRequestDTO {
         this.travelMode = travelMode;
     }
 
-    public String getRoutingPreference() {
-        return routingPreference;
-    }
-
-    public void setRoutingPreference(String routingPreference) {
-        this.routingPreference = routingPreference;
-    }
 }

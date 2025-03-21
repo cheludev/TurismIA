@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,8 +49,8 @@ public class SpotService {
         spot.setInfo(touristicInfo);
         return spot;
     }
-    public void saveCitySpots(String city) {
-        googleSpotService.getSpots(city)
+    public Mono<List<Spot>> saveCitySpots(String city) {
+        return googleSpotService.getSpots(city)
                 .flatMap(jsonResponse -> {
                     try {
                         ObjectMapper objectMapper = new ObjectMapper();
@@ -123,7 +124,9 @@ public class SpotService {
         return spotRepository.findAll();
     }
 
-    public Spot findByLatitudeAndLongitude(Double latitude, Double longitude){
-        return spotRepository.findByLatitudeAndLongitude(latitude, longitude).get(0);
+    public Optional<Spot> findByLatitudeAndLongitude(Double latitude, Double longitude){
+        List<Spot> result = spotRepository.findByLatitudeAndLongitude(latitude, longitude);
+        return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
+
 }

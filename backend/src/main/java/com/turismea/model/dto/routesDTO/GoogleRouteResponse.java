@@ -1,21 +1,35 @@
 package com.turismea.model.dto.routesDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class GoogleRouteResponse {
-    private int originIndex;
-    private int destinationIndex;
+
+    @JsonProperty("originIndex")
+    private Integer originIndex;
+
+    @JsonProperty("destinationIndex")
+    private Integer destinationIndex;
+
+    @JsonProperty("distanceMeters")
     private Integer distanceMeters;
+
+    @JsonProperty("duration")
     private String duration;
+
+    @JsonProperty("condition")
     private String condition;
-    // Se puede incluir un campo de status según se necesite
+
+    @JsonProperty("status")
     private Status status;
 
     public GoogleRouteResponse() {
     }
 
-    public GoogleRouteResponse(int originIndex, int destinationIndex, int distanceMeters, Status status, String duration, String condition) {
+    public GoogleRouteResponse(Integer originIndex, Integer destinationIndex, Integer distanceMeters, Status status, String duration, String condition) {
         this.originIndex = originIndex;
         this.destinationIndex = destinationIndex;
         this.distanceMeters = distanceMeters;
@@ -24,19 +38,19 @@ public class GoogleRouteResponse {
         this.condition = condition;
     }
 
-    public int getOriginIndex() {
+    public Integer getOriginIndex() {
         return originIndex;
     }
 
-    public void setOriginIndex(int originIndex) {
+    public void setOriginIndex(Integer originIndex) {
         this.originIndex = originIndex;
     }
 
-    public int getDestinationIndex() {
+    public Integer getDestinationIndex() {
         return destinationIndex;
     }
 
-    public void setDestinationIndex(int destinationIndex) {
+    public void setDestinationIndex(Integer destinationIndex) {
         this.destinationIndex = destinationIndex;
     }
 

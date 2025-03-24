@@ -1,10 +1,17 @@
 package com.turismea.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 
 @Entity
 @Table(name = "admin")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Admin extends User {
 
     @OneToMany(mappedBy = "admin", fetch = FetchType.LAZY)
@@ -16,21 +23,10 @@ public class Admin extends User {
     @OneToMany(mappedBy = "admin")
     private List<Request> appliedToChangeTheProvince;
 
-    // Default constructor
-    public Admin() {}
-
     public Admin(String user, String password) {
         this.setUsername(user);
         this.setPassword(password);
     }
 
-    // Getters and Setters
 
-    public List<Report> getReportList() {
-        return reportList;
-    }
-
-    public void setReportList(List<Report> reportList) {
-        this.reportList = reportList;
-    }
 }

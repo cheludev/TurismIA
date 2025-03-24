@@ -3,6 +3,9 @@ package com.turismea.model.entity;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +13,9 @@ import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -49,51 +55,4 @@ public class User {
         this.role = role;
     }
 
-    public User() {
-
-    }
-
-    // Getters y Setters
-    public Long getId() { return id; }
-    public String getUsername() { return username; }
-    public String getEmail() { return email; }
-    public String getPassword() { return password; }
-    public Role getRole() { return role; }
-    public byte[] getPhoto() {
-        return photo;
-    }
-    public String getFirstName() {
-        return firstName;
-    }
-    public String getLastName() {
-        return lastName;
-    }
-    public List<Request> getRequest() {
-        return request;
-    }
-
-    public void setRequest(List<Request> request) {
-        this.request = request;
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-    public void setUsername(String username) { this.username = username; }
-    public void setEmail(String email) { this.email = email; }
-    public void setPassword(String password) { this.password = password; }
-    public void setRole(Role role) { this.role = role; }
-    public void setPhoto(byte[] photo) {this.photo = photo;}
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public void setProvince(Province province) {
-        this.province = province;
-    }
-
-    public Province getProvince() {
-        return this.province;
-    }
 }

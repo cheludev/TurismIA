@@ -3,9 +3,15 @@ package com.turismea.model.entity;
 
 import com.turismea.model.enumerations.Province;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "moderator")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Moderator extends User{
 
     @Column(nullable = false)
@@ -24,16 +30,5 @@ public class Moderator extends User{
         this.province = province;
     }
 
-    // Default constructor
-    public Moderator() {}
 
-    // Getters and Setters
-
-    public Province getProvince() {
-        return province;
-    }
-
-    public void setProvince(Province province) {
-        this.province = province;
-    }
 }

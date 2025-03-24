@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.exception.SpotNotFoundException;
 import com.turismea.model.dto.placesDTO.GooglePlacesResponse;
 import com.turismea.model.dto.placesDTO.Place;
-import com.turismea.model.dto.routesDTO.Waypoint;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
 import com.turismea.repository.SpotRepository;
@@ -106,19 +105,6 @@ public class SpotService {
     public List<Spot> getAllSpotByCity(City city) {
         return spotRepository.getSpotByCity(city);
     }
-
-    public Flux<Waypoint> getDestinationSpots(Waypoint origin, Flux<Waypoint> wayPointFlux) {
-        Mono<List<Waypoint>> list = wayPointFlux.collectList();
-        return list.flatMapMany(list1 -> {
-            int originIndex = list1.indexOf(origin);
-            return Flux.fromIterable(
-                    list1.stream()
-                            .filter(spot -> list1.indexOf(spot) > originIndex)
-                            .toList()
-            );
-        });
-    }
-
 
     public List<Spot> getAllSpots() {
         return spotRepository.findAll();

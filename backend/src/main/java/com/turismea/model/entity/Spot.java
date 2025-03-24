@@ -1,11 +1,17 @@
 package com.turismea.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Spot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,10 +53,6 @@ public class Spot {
         this.routes = routes;
     }
 
-    public Spot() {
-
-    }
-
     public Spot(Spot spot) {
         this.id = spot.getId();
         this.name = spot.getName();
@@ -62,96 +64,7 @@ public class Spot {
         this.averageTime = spot.getAverageTime();
         this.validated = spot.isValidated();
         this.info = spot.getInfo();
-        this.routes = new ArrayList<>(spot.getRoutes()); // Copia la lista para evitar modificaciones accidentales
-    }
-
-
-    public List<Route> getRoutes() {
-        return routes;
-    }
-
-    public void setRoutes(List<Route> routes) {
-        this.routes = routes;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
-    }
-
-    public boolean isValidated() {
-        return validated;
-    }
-
-    public void setValidated(boolean validated) {
-        this.validated = validated;
-    }
-
-    public int getAverageTime() {
-        return averageTime;
-    }
-
-    public void setAverageTime(int averageTime) {
-        this.averageTime = averageTime;
-    }
-
-    public int getGoogleIndex() {
-        return googleIndex;
-    }
-
-    public void setGoogleIndex(int googleIndex) {
-        this.googleIndex = googleIndex;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.routes = new ArrayList<>(spot.getRoutes());
     }
 
 

@@ -4,8 +4,14 @@ import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.RequestType;
 import com.turismea.model.enumerations.RequestStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,45 +43,6 @@ public class Request {
         this.province = province;
     }
 
-    public Request() {
 
-    }
-
-    // Getters y Setters
-    public User getUser() {
-        return user;
-    }
-
-    public RequestType getType() {
-        return type;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setType(RequestType type) {
-        this.type = type;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public RequestStatus getStatus() {
-        return this.requestStatus;
-    }
-
-    public void setStatus(RequestStatus requestStatus) {
-        this.requestStatus = requestStatus;
-    }
-
-    public void setReasonsOfTheRequest(String reasons) {
-        this.reasonsOfTheRequest = reasons;
-    }
 }
 

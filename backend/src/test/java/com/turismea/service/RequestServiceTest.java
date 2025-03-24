@@ -87,7 +87,7 @@ public class RequestServiceTest {
 
         requestService.manageRequest(requestId, RequestStatus.APPROVED, province);
 
-        assertEquals(RequestStatus.APPROVED, request.getStatus(), "The request status should be updated to APPROVED.");
+        assertEquals(RequestStatus.APPROVED, request.getRequestStatus(), "The request status should be updated to APPROVED.");
         verify(requestRepository).save(request);
         verify(userService).updateUser(user);
     }
@@ -106,7 +106,7 @@ public class RequestServiceTest {
 
         requestService.manageRequest(requestId, RequestStatus.DENIED, province);
 
-        assertEquals(RequestStatus.DENIED, request.getStatus(), "The request status should be updated to DENIED.");
+        assertEquals(RequestStatus.DENIED, request.getRequestStatus(), "The request status should be updated to DENIED.");
         verify(requestRepository).save(request);
         verify(userService).updateUser(user);
     }
@@ -151,7 +151,7 @@ public class RequestServiceTest {
 
         requestService.denyRequest(request);
 
-        assertEquals(RequestStatus.DENIED, request.getStatus(), "The request should be marked as DENIED.");
+        assertEquals(RequestStatus.DENIED, request.getRequestStatus(), "The request should be marked as DENIED.");
     }
 
     @Test

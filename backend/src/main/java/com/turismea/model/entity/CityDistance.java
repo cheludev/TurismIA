@@ -1,6 +1,9 @@
 package com.turismea.model.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "city_distances",
@@ -8,6 +11,9 @@ import jakarta.persistence.*;
         indexes = {
                 @Index(name = "idx_location_pair", columnList = "location_a_id, location_b_id")
         })
+@Getter
+@Setter
+@NoArgsConstructor
 public class CityDistance {
 
     @Id
@@ -27,14 +33,12 @@ public class CityDistance {
     private Spot spotB;
 
     @Column(nullable = false)
-    private int distance;
+    private long distance;
 
     @Column(nullable = false)
-    private int duration;
+    private long duration;
 
-    public CityDistance() {}
-
-    public CityDistance(City city, Spot spotA, Spot spotB, int distance, int duration) {
+    public CityDistance(City city, Spot spotA, Spot spotB, long distance, long duration) {
         // Avoid duplicates in reverse order
         if (spotA.getId() > spotB.getId()) {
             Spot temp = spotA;
@@ -49,52 +53,4 @@ public class CityDistance {
         this.duration = duration;
     }
 
-    // Getters y Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
-
-    public Spot getSpotA() {
-        return spotA;
-    }
-
-    public void setSpotA(Spot spotA) {
-        this.spotA = spotA;
-    }
-
-    public Spot getSpotB() {
-        return spotB;
-    }
-
-    public void setSpotB(Spot spotB) {
-        this.spotB = spotB;
-    }
-
-    public int getDistance() {
-        return distance;
-    }
-
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -37,13 +38,13 @@ public class Route {
             joinColumns = @JoinColumn(name = "route_id"),  // Foreign key -> Route
             inverseJoinColumns = @JoinColumn(name = "location_id") // Foreign key -> Spot
     )
-    private List<Spot> spots; //We create an intermediate table which contains the relation between Routes and they spots.
+    private LinkedList<Spot> spots; //We create an intermediate table which contains the relation between Routes and they spots.
 
     @Column(columnDefinition = "TEXT")
     @Lob
     private String description;
 
-    public Route(Long id, String name, City city, Tourist owner, int rate, List<Spot> spots, String description) {
+    public Route(Long id, String name, City city, Tourist owner, int rate, LinkedList<Spot> spots, String description) {
         this.id = id;
         this.name = name;
         this.city = city;

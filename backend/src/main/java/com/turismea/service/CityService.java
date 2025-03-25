@@ -36,4 +36,7 @@ public class CityService {
                 .orElseGet(() -> cityRepository.save(new City(city)));
     }
 
+    public Optional<City> getCityByName(String city) {
+        return cityRepository.findByName(city);
+    }
 }

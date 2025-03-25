@@ -1,6 +1,6 @@
 package com.turismea.service;
 
-import com.turismea.model.dto.osrmDistanceDTO.Location;
+import com.turismea.model.dto.Location;
 import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.CityDistance;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class CityDistanceService {
@@ -38,6 +37,8 @@ public class CityDistanceService {
         return cityDistanceRepository.save(cityDistance);
 
     }
+
+
 
     public void getAllDistances(City city, List<Spot> spotList) {
         if (spotList == null || spotList.size() < 2) {

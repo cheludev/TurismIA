@@ -1,12 +1,11 @@
 package com.turismea.service;
 
-import com.turismea.model.dto.osrmDistanceDTO.Location;
+import com.turismea.model.dto.Location;
 import com.turismea.model.dto.osrmDistanceDTO.OsrmResponse;
 import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;

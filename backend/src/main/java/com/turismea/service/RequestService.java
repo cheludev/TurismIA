@@ -41,7 +41,7 @@ public class RequestService {
             denyRequest(request);
         }
 
-        request.setStatus(requestStatus);
+        request.setRequestStatus(requestStatus);
         requestRepository.save(request);
         userService.updateUser(user);
     }
@@ -65,7 +65,7 @@ public class RequestService {
     }
 
     public void denyRequest(Request request) {
-        request.setStatus(RequestStatus.DENIED);
+        request.setRequestStatus(RequestStatus.DENIED);
     }
 
     public void deleteRequest(Long requestId) {

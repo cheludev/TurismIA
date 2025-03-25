@@ -2,11 +2,14 @@ package com.turismea.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.exception.SpotNotFoundException;
+import com.turismea.model.dto.Location;
 import com.turismea.model.dto.placesDTO.GooglePlacesResponse;
 import com.turismea.model.dto.placesDTO.Place;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
 import com.turismea.repository.SpotRepository;
+import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,6 +52,7 @@ public class SpotService {
         return spot;
     }
     public Mono<List<Spot>> saveCitySpots(String city) {
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         return googleSpotService.getSpots(city)
                 .flatMap(jsonResponse -> {
                     try {
@@ -62,17 +66,27 @@ public class SpotService {
 
                         List<Spot> spots = places.stream()
                                 .filter(place -> !existingNames.contains(place.getName()))
-                                .map(place -> new Spot(
-                                        place.getName(),
-                                        cityEntity,
-                                        place.getFormattedAddress(),
-                                        place.getLocation().getLatitude(),
-                                        place.getLocation().getLongitude(),
-                                        15,
-                                        false,
-                                        "",
-                                        new ArrayList<>()
-                                ))
+                                .map(place -> {
+                                    System.err.println("*********************"
+                                            + place.getRating());
+                                    Coordinate coordinate = new Coordinate(place.getLocation().getLatitude(),
+                                            place.getLocation().getLongitude());
+                                    Point point = geometryFactory.createPoint(coordinate);
+                                    return new Spot(
+                                            place.getName(),
+                                            cityEntity,
+                                            place.getFormattedAddress(),
+                                            place.getLocation().getLatitude(),
+                                            place.getLocation().getLongitude(),
+                                            15,
+                                            false,
+                                            "",
+                                            new ArrayList<>(),
+                                            place.getRating(),
+                                            point
+                                    );
+                                }
+                                )
                                 .collect(Collectors.toList());
 
                         if (!spots.isEmpty()) {
@@ -113,6 +127,14 @@ public class SpotService {
     public Optional<Spot> findByLatitudeAndLongitude(Double latitude, Double longitude){
         List<Spot> result = spotRepository.findByLatitudeAndLongitude(latitude, longitude);
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+    }
+
+    public List<Spot> getNearbySpotsToFromAPoint(String wktPoint, double radius){
+        return spotRepository.getNearbySpotsToFromAPoint(wktPoint, radius);
+    }
+
+    public Double getDistanceBetween(String wktPointA, String wktPointB) {
+        return spotRepository.getDistanceBetween(wktPointA, wktPointB);
     }
 
 }

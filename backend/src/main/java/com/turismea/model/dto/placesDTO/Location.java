@@ -1,7 +1,13 @@
 package com.turismea.model.dto.placesDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Data
+@Setter
 public class Location {
     private Double latitude;
     private Double longitude;
@@ -13,7 +19,4 @@ public class Location {
     }
 
     public Location() {}
-
-    public Double getLatitude() { return latitude; }
-    public Double getLongitude() { return longitude; }
-}
+    }

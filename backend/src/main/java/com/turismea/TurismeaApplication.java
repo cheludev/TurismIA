@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootApplication
 public class TurismeaApplication implements CommandLineRunner {
@@ -32,6 +33,7 @@ public class TurismeaApplication implements CommandLineRunner {
     public void run(String... args) {
         System.out.println("========== Loading all spots from DB ==========");
 
+
         spotService.saveCitySpots("Huelva").block();
         List<Spot> spots = spotService.getAllSpots();
 
@@ -45,13 +47,20 @@ public class TurismeaApplication implements CommandLineRunner {
 
             System.out.println("========== Creating distances between spots ==========");
 
-            // Call the sequential distance calculation method
-            Mono<Void> distanceCalculationProcess = cityDistanceService.getDistanceMatrixSequential(spots);
+            // Retrieve the City object for "Huelva"
+            Optional<City> city = cityService.getCityByName("Huelva");
 
-            // Block to wait for completion since it's a reactive process in a non-reactive main method
-            distanceCalculationProcess.block();
 
-            System.out.println("Distance calculation process completed.");
+            if (city.isEmpty()) {
+                System.err.println("City 'Huelva' not found in the database.");
+                return;
+            }
+
+            // Call your distance calculation method
+            cityDistanceService.getAllDistances(city.orElse(null), spots);
+
+            System.out.println("Distance calculation process started (async).");
         }
     }
+
 }

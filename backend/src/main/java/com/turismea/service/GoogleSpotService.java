@@ -31,7 +31,7 @@ public class GoogleSpotService {
                     return webClient.post()
                             .uri(uriBuilder -> uriBuilder
                                     .path("/v1/places:searchText")
-                                    .queryParam("fields", "places.displayName,places.formattedAddress,places.location,places.types")
+                                    .queryParam("fields", "places.displayName,places.formattedAddress,places.location,places.types,places.rating")
                                     .build()
                             )
                             .header("Authorization", "Bearer " + accessToken)

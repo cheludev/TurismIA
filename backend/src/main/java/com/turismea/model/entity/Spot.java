@@ -1,9 +1,11 @@
 package com.turismea.model.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Spot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +28,13 @@ public class Spot {
     private String address;
     private Double latitude;
     private Double longitude;
-
+    private Double rating;
     private int averageTime;
     private boolean validated;
+
+    @Column(columnDefinition = "POINT SRID 4326")
+    private Point coordinates;
+
 
     @Column(columnDefinition = "TEXT")
     @Lob
@@ -39,9 +46,9 @@ public class Spot {
 
     public Spot(String name, City city, String address, Double latitude,
                 Double longitude, int averageTime, boolean validated,
-                String info, List<Route> routes) {
+                String info, List<Route> routes, Double rating, Point coordinates) {
 
-
+        this.rating = rating;
         this.name = name;
         this.city = city;
         this.address = address;
@@ -51,6 +58,7 @@ public class Spot {
         this.validated = validated;
         this.info = info;
         this.routes = routes;
+        this.coordinates = coordinates;
     }
 
     public Spot(Spot spot) {

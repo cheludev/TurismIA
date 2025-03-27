@@ -2,6 +2,7 @@ package com.turismea.model.dto.placesDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.turismea.model.dto.LocationDTO;
 import lombok.*;
 
 @Getter
@@ -22,7 +23,7 @@ public class Place {
     private String formattedAddress;
 
     @JsonProperty("location")
-    private Location location;
+    private LocationDTO locationDTO;
 
     @JsonProperty("rating")
     private Double rating;

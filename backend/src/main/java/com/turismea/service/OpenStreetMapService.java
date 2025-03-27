@@ -1,6 +1,6 @@
 package com.turismea.service;
 
-import com.turismea.model.dto.Location;
+import com.turismea.model.dto.LocationDTO;
 import com.turismea.model.dto.osrmDistanceDTO.OsrmResponse;
 import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +20,13 @@ public class OpenStreetMapService {
         this.webClient = webClient;
     }
 
-    public Mono<List<RouteDTO>> getDistance(Location initialPoint, Location finalPoint){
+    /**
+     * Get the distances between two locations provided.
+     * @param initialPoint Initial location
+     * @param finalPoint Destination point
+     */
+
+    public Mono<List<RouteDTO>> getDistance(LocationDTO initialPoint, LocationDTO finalPoint){
 
         return webClient.get()
                 .uri("/walking/" + initialPoint.getLongitude() + "," + initialPoint.getLatitude()
@@ -29,9 +35,5 @@ public class OpenStreetMapService {
                 .retrieve()
                 .bodyToMono(OsrmResponse.class)
                 .map(OsrmResponse::getRoutes);
-
-
-
-
     }
 }

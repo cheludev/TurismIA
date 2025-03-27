@@ -71,7 +71,7 @@ class CityServiceTest {
         Optional<City> foundCity = cityService.findByName(cityName).orElseThrow();
 
         assertNotNull(foundCity);
-        assertEquals(cityName, foundCity.orElseGet(() -> cityService.existOrCreateCity(cityName)));
+        assertEquals(cityName, foundCity.orElseGet(() -> cityService.existOrCreateCity(cityName)).getName());
         verify(cityRepository).findByName(cityName);
     }
 }

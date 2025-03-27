@@ -46,7 +46,7 @@ public class SpotServiceTest {
     private String mockJsonResponse = "{ \"places\": [" +
             "{ \"displayName\": { \"text\": \"Museo de Huelva\" }, " +
             "\"formattedAddress\": \"Huelva, España\", " +
-            "\"location\": { \"latitude\": 37.2583, \"longitude\": -6.9495 }, " +
+            "\"locationDTO\": { \"latitude\": 37.2583, \"longitude\": -6.9495 }, " +
             "\"id\": \"ChIJr8h3sHtxEg0Rn1w9QhDys4E\" } ] }";
 
     @BeforeEach
@@ -161,60 +161,51 @@ public class SpotServiceTest {
 
 
 
-
     @Test
     void testSaveCitySpots() throws Exception {
         String cityName = "Madrid";
 
         String fakeJsonResponse = """
-            {
-              "places": [
-                {
-                  "name": "places/ChIJSyhE1-bPEQ0Rgw-0EMGqK9g",
-                  "id": "ChIJSyhE1-bPEQ0Rgw-0EMGqK9g",
-                  "formattedAddress": "Madrid, Spain",
-                  "location": {
-                    "latitude": 40.4168,
-                    "longitude": -3.7038
-                  },
-                  "displayName": {
-                    "text": "Huelva",
-                    "languageCode": "en"
-                  }
-                }
-              ]
-            }
-            """;
-
-        when(googleSpotService.getSpots(cityName))
-                .thenReturn(Mono.just(fakeJsonResponse));
+    {
+      "places": [
+        {
+          "name": "places/ChIJSyhE1-bPEQ0Rgw-0EMGqK9g",
+          "id": "ChIJSyhE1-bPEQ0Rgw-0EMGqK9g",
+          "formattedAddress": "Madrid, Spain",
+          "location": {
+            "latitude": 40.4168,
+            "longitude": -3.7038
+          },
+          "displayName": {
+            "text": "Huelva",
+            "languageCode": "en"
+          }
+        }
+      ]
+    }
+    """;
 
         City mockCity = new City();
         mockCity.setName(cityName);
+
+        when(googleSpotService.getSpots(cityName)).thenReturn(Mono.just(fakeJsonResponse));
+        when(cityService.existOrCreateCity(cityName)).thenReturn(mockCity);
         when(cityService.findByName(cityName)).thenReturn(Optional.of(Optional.of(mockCity)));
 
-        spotService.saveCitySpots(cityName);
+        spotService.saveCitySpots(cityName).block();
 
         ArgumentCaptor<List<Spot>> spotCaptor = ArgumentCaptor.forClass(List.class);
         verify(spotRepository).saveAll(spotCaptor.capture());
         List<Spot> savedSpots = spotCaptor.getValue();
 
-        assertEquals(1, savedSpots.size()); // Asegurar que se guardó 1 Spot
-        Spot savedSpot = savedSpots.get(0); // Obtener el único Spot guardado
+        assertEquals(1, savedSpots.size());
+        Spot savedSpot = savedSpots.get(0);
 
         assertEquals("Madrid", savedSpot.getCity().getName());
         assertEquals("Huelva", savedSpot.getName());
-        assertEquals("Madrid, Spain", savedSpot.getAddress());
-        assertEquals(40.4168, savedSpot.getLatitude());
-        assertEquals(-3.7038, savedSpot.getLongitude());
-
-        assertEquals("Madrid", savedSpot.getCity().getName());
-
-
-        assertEquals("Huelva", savedSpot.getName());
-
         assertEquals("Madrid, Spain", savedSpot.getAddress());
         assertEquals(40.4168, savedSpot.getLatitude());
         assertEquals(-3.7038, savedSpot.getLongitude());
     }
+
 }

@@ -14,17 +14,17 @@ public class OrdenationAlgorithimService {
     /**
      * Sort spots by distance in ascending order.
      * @param spots list of spots
-     * @param distances list of distances in same order as spots
+     * @param duration list of duration in same order as spots
      */
-    public void sortByDistanceAndRating(List<Spot> spots, List<Double> distances) {
-        if (spots.size() != distances.size()) {
-            throw new IllegalArgumentException("Spots and distances must have the same size");
+    public void sortByDurationAndRating(List<Spot> spots, List<Long> duration) {
+        if (spots.size() != duration.size()) {
+            throw new IllegalArgumentException("Spots and duration must have the same size");
         }
 
         // Pair each spot with its distance and sort
         List<SpotDistancePair> paired = new java.util.ArrayList<>();
         for (int i = 0; i < spots.size(); i++) {
-            paired.add(new SpotDistancePair(spots.get(i), distances.get(i)));
+            paired.add(new SpotDistancePair(spots.get(i), duration.get(i)));
         }
 
         // Sort using Insertion Sort for small datasets
@@ -48,6 +48,7 @@ public class OrdenationAlgorithimService {
      * Sort spots by rating in descending order.
      * @param spots list of spots
      */
+
     public void sortByRating(List<Spot> spots) {
         spots.sort(Comparator.comparingDouble(Spot::getRating).reversed());
     }

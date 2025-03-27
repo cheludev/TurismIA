@@ -1,14 +1,16 @@
 package com.turismea.service;
 
-import com.turismea.model.dto.Location;
+import com.turismea.model.dto.LocationDTO;
 import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.CityDistance;
 import com.turismea.model.entity.Spot;
 import com.turismea.repository.CityDistanceRepository;
 import com.turismea.repository.RouteRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
@@ -32,17 +34,16 @@ public class CityDistanceService {
         cityDistanceRepository.saveAll(spotDistancesList);
     }
 
-
+    @Transactional
     public CityDistance save(CityDistance cityDistance) {
         return cityDistanceRepository.save(cityDistance);
-
     }
 
 
-
+    @Transactional
     public void getAllDistances(City city, List<Spot> spotList) {
         if (spotList == null || spotList.size() < 2) {
-            System.err.println("La lista de spots es nula o no tiene suficientes elementos.");
+            System.err.println("Spot list is null or it has not sufficient elements.");
             return;
         }
 
@@ -53,13 +54,13 @@ public class CityDistanceService {
                 Spot spotB = spotList.get(j);
 
                 openStreetMapService.getDistance(
-                                new Location(spotA.getLatitude(), spotA.getLongitude()),
-                                new Location(spotB.getLatitude(), spotB.getLongitude())
+                                new LocationDTO(spotA.getLatitude(), spotA.getLongitude()),
+                                new LocationDTO(spotB.getLatitude(), spotB.getLongitude())
                         )
-                        .doOnError(e -> System.err.println("Error al obtener distancia entre " + spotA.getName() + " y " + spotB.getName() + ": " + e.getMessage()))
+                        .doOnError(e -> System.err.println("Error getting distance between " + spotA.getName() + " and " + spotB.getName() + ": " + e.getMessage()))
                         .subscribe(routeList -> {
                             if (routeList == null || routeList.isEmpty()) {
-                                System.err.println("No se encontraron rutas entre " + spotA.getName() + " y " + spotB.getName());
+                                System.err.println("Routes not found between -> " + spotA.getName() + " and " + spotB.getName());
                                 return;
                             }
 
@@ -77,11 +78,27 @@ public class CityDistanceService {
                                 ));
 
                             } catch (Exception e) {
-                                System.err.println("Error al guardar distancia entre " + spotA.getName() + " y " + spotB.getName() + ": " + e.getMessage());
+                                System.err.println("Error saving " + spotA.getName() + " and " + spotB.getName() + ": " + e.getMessage());
                             }
                         });
             }
         }
     }
+
+    public Long getDistancesBetween(LocationDTO locationA, LocationDTO locationB) {
+        return openStreetMapService.getDistance(locationA, locationB)
+                .flatMap(routeList ->
+                        routeList.stream()
+                                .min(Comparator.comparingLong(RouteDTO::getDuration))
+                                .map(route -> Mono.just(route.getDistance()))
+                                .orElseGet(Mono::empty)
+                )
+                .onErrorResume(e -> {
+                    System.err.println("Error: " + e.getMessage());
+                    return Mono.empty();
+                })
+                .block();
+    }
+
 
 }

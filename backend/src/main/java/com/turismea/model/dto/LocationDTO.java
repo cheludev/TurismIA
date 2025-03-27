@@ -1,15 +1,13 @@
 package com.turismea.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Data
 @Setter
 @AllArgsConstructor
 @Getter
-public class Location {
+@NoArgsConstructor
+public class LocationDTO {
 
     private Double latitude;
     private Double longitude;

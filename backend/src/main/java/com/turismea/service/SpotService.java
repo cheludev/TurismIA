@@ -2,7 +2,6 @@ package com.turismea.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.exception.SpotNotFoundException;
-import com.turismea.model.dto.Location;
 import com.turismea.model.dto.placesDTO.GooglePlacesResponse;
 import com.turismea.model.dto.placesDTO.Place;
 import com.turismea.model.entity.City;
@@ -11,7 +10,6 @@ import com.turismea.repository.SpotRepository;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.Coordinate;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -69,15 +67,18 @@ public class SpotService {
                                 .map(place -> {
                                     System.err.println("*********************"
                                             + place.getRating());
-                                    Coordinate coordinate = new Coordinate(place.getLocation().getLatitude(),
-                                            place.getLocation().getLongitude());
+
+                                            System.err.println(place.getLocationDTO().getLatitude() + " " +
+                                                    place.getLocationDTO().getLongitude());
+                                    Coordinate coordinate = new Coordinate(place.getLocationDTO().getLatitude(),
+                                            place.getLocationDTO().getLongitude());
                                     Point point = geometryFactory.createPoint(coordinate);
                                     return new Spot(
                                             place.getName(),
                                             cityEntity,
                                             place.getFormattedAddress(),
-                                            place.getLocation().getLatitude(),
-                                            place.getLocation().getLongitude(),
+                                            place.getLocationDTO().getLatitude(),
+                                            place.getLocationDTO().getLongitude(),
                                             15,
                                             false,
                                             "",

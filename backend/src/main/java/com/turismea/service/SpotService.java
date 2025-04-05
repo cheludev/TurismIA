@@ -2,6 +2,7 @@ package com.turismea.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.exception.SpotNotFoundException;
+import com.turismea.model.dto.LocationDTO;
 import com.turismea.model.dto.placesDTO.GooglePlacesResponse;
 import com.turismea.model.dto.placesDTO.Place;
 import com.turismea.model.entity.City;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -135,7 +137,23 @@ public class SpotService {
     }
 
     public Double getDistanceBetween(String wktPointA, String wktPointB) {
+        System.out.println("===> WKT A: " + wktPointA);
+        System.out.println("===> WKT B: " + wktPointB);
+
         return spotRepository.getDistanceBetween(wktPointA, wktPointB);
+    }
+
+    public Spot getFinalOrInitialPoint(int type, LocationDTO locationDTO){
+        if(locationDTO == null) {
+            return new Spot();
+        }
+        String finalOrInitial;
+        if (type == 0) { //initial
+            finalOrInitial = "Initial Point";
+        } else {
+            finalOrInitial = "Final Point";
+        }
+        return new Spot(finalOrInitial, locationDTO.getLatitude(), locationDTO.getLongitude());
     }
 
 }

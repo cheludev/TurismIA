@@ -39,7 +39,6 @@ public class CityDistance {
     private long duration;
 
     public CityDistance(City city, Spot spotA, Spot spotB, long distance, long duration) {
-        // Avoid duplicates in reverse order
         if (spotA.getId() > spotB.getId()) {
             Spot temp = spotA;
             spotA = spotB;

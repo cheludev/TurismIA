@@ -23,7 +23,7 @@ public class GoogleSpotService {
         return googleAuthService.getAccessToken()
                 .flatMap(accessToken -> {
                     String requestBody = "{"
-                            + "\"textQuery\": \"touristic points in " + city + "capital España\","
+                            + "\"textQuery\": \"touristic points in metropolitan area of" + city + "capital España\","
                             + "\"regionCode\": \"ES\","
                             + "\"languageCode\": \"es\""
                             + "}";

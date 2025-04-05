@@ -9,25 +9,25 @@ import com.turismea.repository.CityDistanceRepository;
 import com.turismea.repository.RouteRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CityDistanceService {
 
     private final CityDistanceRepository cityDistanceRepository;
     private final OpenStreetMapService openStreetMapService;
-    private final RouteRepository routeRepository;
 
     @Autowired
     public CityDistanceService(CityDistanceRepository cityDistanceRepository, OpenStreetMapService openStreetMapService,
                                RouteRepository routeRepository) {
         this.cityDistanceRepository = cityDistanceRepository;
         this.openStreetMapService = openStreetMapService;
-        this.routeRepository = routeRepository;
     }
 
     public void saveCityDistances(List<CityDistance> spotDistancesList) {
@@ -36,14 +36,45 @@ public class CityDistanceService {
 
     @Transactional
     public CityDistance save(CityDistance cityDistance) {
-        return cityDistanceRepository.save(cityDistance);
+        // Ensure spots are ordered by ID to prevent duplicate entries due to inverse spot order
+        Spot spotA = cityDistance.getSpotA();
+        Spot spotB = cityDistance.getSpotB();
+
+        if (spotA.getId() > spotB.getId()) {
+            Spot temp = spotA;
+            spotA = spotB;
+            spotB = temp;
+        }
+
+        // Check if a CityDistance already exists between these two spots (ignoring order)
+        Optional<CityDistance> existing = cityDistanceRepository
+                .findBySpotsIgnoreOrder(spotA, spotB)
+                .stream().findFirst();
+
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        // Create a new CityDistance entity with the correctly ordered spots
+        CityDistance toSave = new CityDistance(
+                cityDistance.getCity(),
+                spotA,
+                spotB,
+                cityDistance.getDistance(),
+                cityDistance.getDuration()
+        );
+
+        // Save to database
+        CityDistance saved = cityDistanceRepository.save(toSave);
+
+
+        return saved;
     }
 
 
     @Transactional
     public void getAllDistances(City city, List<Spot> spotList) {
         if (spotList == null || spotList.size() < 2) {
-            System.err.println("Spot list is null or it has not sufficient elements.");
             return;
         }
 
@@ -60,7 +91,6 @@ public class CityDistanceService {
                         .doOnError(e -> System.err.println("Error getting distance between " + spotA.getName() + " and " + spotB.getName() + ": " + e.getMessage()))
                         .subscribe(routeList -> {
                             if (routeList == null || routeList.isEmpty()) {
-                                System.err.println("Routes not found between -> " + spotA.getName() + " and " + spotB.getName());
                                 return;
                             }
 
@@ -78,7 +108,6 @@ public class CityDistanceService {
                                 ));
 
                             } catch (Exception e) {
-                                System.err.println("Error saving " + spotA.getName() + " and " + spotB.getName() + ": " + e.getMessage());
                             }
                         });
             }
@@ -94,10 +123,34 @@ public class CityDistanceService {
                                 .orElseGet(Mono::empty)
                 )
                 .onErrorResume(e -> {
-                    System.err.println("Error: " + e.getMessage());
                     return Mono.empty();
                 })
                 .block();
+    }
+
+    public Long getDurationBetween(LocationDTO locationA, LocationDTO locationB) {
+        return openStreetMapService.getDistance(locationA, locationB)
+                .flatMap(routeList ->
+                        routeList.stream()
+                                .min(Comparator.comparingLong(RouteDTO::getDuration))
+                                .map(route -> Mono.just(route.getDuration()))
+                                .orElseGet(Mono::empty)
+                )
+                .onErrorResume(e -> {
+                    return Mono.empty();
+                })
+                .block();
+    }
+
+    public List<Spot> getListOfConnections(Spot spotA){
+        return cityDistanceRepository.getConnections(spotA);
+    }
+
+    public List<CityDistance> getListOfCityDistancesIgnoringOrder(Spot spot1, Spot spot2){
+        return cityDistanceRepository.findBySpotsIgnoreOrder(spot1, spot2);
+    }
+    public List<CityDistance> getAllConnectionsOf(Spot spot) {
+        return cityDistanceRepository.findAllConnectionsOf(spot);
     }
 
 

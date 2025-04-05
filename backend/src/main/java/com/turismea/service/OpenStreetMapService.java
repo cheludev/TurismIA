@@ -36,4 +36,15 @@ public class OpenStreetMapService {
                 .bodyToMono(OsrmResponse.class)
                 .map(OsrmResponse::getRoutes);
     }
+
+    public Mono<List<RouteDTO>> getRouteTime(LocationDTO initialPoint, LocationDTO finalPoint){
+
+        return webClient.get()
+                .uri("/walking/" + initialPoint.getLongitude() + "," + initialPoint.getLatitude()
+                        + ";" + finalPoint.getLongitude() + "," + finalPoint.getLatitude()
+                        + "?overview=full&geometries=geojson&alternatives=true")
+                .retrieve()
+                .bodyToMono(OsrmResponse.class)
+                .map(OsrmResponse::getRoutes);
+    }
 }

@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+
 public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +29,7 @@ public class Route {
     private Tourist owner;
 
     private int rate;
+    private long duration;
 
     @OneToOne(mappedBy = "route")
     private Report report;
@@ -52,6 +54,19 @@ public class Route {
         this.rate = rate;
         this.spots = spots;
         this.description = description;
+        this.duration = 0;
+    }
+
+    public Route(Route route) {
+        this.id = route.id;
+        this.name = route.name;
+        this.city = route.city;
+        this.owner = route.owner;
+        this.rate = route.rate;
+        this.report = route.report;
+        this.spots = route.spots != null ? new LinkedList<>(route.spots) : null;
+        this.description = route.description;
+        this.duration = route.getDuration();
     }
 
 }

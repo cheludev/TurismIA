@@ -23,12 +23,15 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
     @Query("SELECT s.name FROM Spot s")
     List<String> findAllNames();
 
-    @Query(value = "SELECT s.*, ST_Distance_Sphere(ST_GeomFromText(:point, 4326), ) AS distance" +
-            "FROM Spot s" +
-            "WHERE ST_Distance_Sphere(coordinates, ST_GeomFromText(:point, 4326)) <= :radius AS distance" +
-            "ORDER BY distance"
-            , nativeQuery = true)
-    List<Spot> getNearbySpotsToFromAPoint(@Param(value = "point") String wktPoint, double radius);
+    @Query(value = """
+    SELECT s.*, 
+           ST_Distance_Sphere(s.coordinates, ST_GeomFromText(:point, 4326)) AS distance
+    FROM spot s
+    WHERE ST_Distance_Sphere(s.coordinates, ST_GeomFromText(:point, 4326)) <= :radius
+    ORDER BY distance
+    """, nativeQuery = true)
+    List<Spot> getNearbySpotsToFromAPoint(@Param("point") String wktPoint, @Param("radius") double radius);
+
 
     @Query(value = "SELECT ST_Distance_Sphere(ST_GeomFromText(:pointA, 4326), ST_GeomFromText(:pointB, 4326))",
             nativeQuery = true)

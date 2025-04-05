@@ -8,6 +8,14 @@ public class SpotNotFoundException extends RuntimeException {
         this.id = id;
     }
 
+    public SpotNotFoundException() {
+        super("You have tried to found a spot, but it is not found");
+    }
+
+    public SpotNotFoundException(String s) {
+        super(s);
+    }
+
     public Long getId() {
         return id;
     }

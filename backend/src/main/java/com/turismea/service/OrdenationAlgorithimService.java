@@ -12,9 +12,9 @@ import java.util.List;
 public class OrdenationAlgorithimService {
 
     /**
-     * Sort spots by distance in ascending order.
+     * Sort spots by distance in ascending sort.
      * @param spots list of spots
-     * @param duration list of duration in same order as spots
+     * @param duration list of duration in same sort as spots
      */
     public void sortByDurationAndRating(List<Spot> spots, List<Long> duration) {
         if (spots.size() != duration.size()) {
@@ -45,7 +45,7 @@ public class OrdenationAlgorithimService {
     }
 
     /**
-     * Sort spots by rating in descending order.
+     * Sort spots by rating in descending sort.
      * @param spots list of spots
      */
 

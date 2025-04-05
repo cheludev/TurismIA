@@ -1,14 +1,17 @@
 package com.turismea.model.entity;
 
+import com.turismea.model.dto.LocationDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -73,6 +76,31 @@ public class Spot {
         this.validated = spot.isValidated();
         this.info = spot.getInfo();
         this.routes = new ArrayList<>(spot.getRoutes());
+    }
+
+    public Spot(String finalOrInitial, Double latitude, Double longitude) {
+        this.name = finalOrInitial;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.averageTime = 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Spot spot = (Spot) o;
+        return Objects.equals(id, spot.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString(){
+        return this.getName();
     }
 
 

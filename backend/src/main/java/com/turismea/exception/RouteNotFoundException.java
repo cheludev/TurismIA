@@ -1,5 +1,8 @@
 package com.turismea.exception;
 
+import lombok.Getter;
+
+@Getter
 public class RouteNotFoundException extends RuntimeException {
     private Long id;
 
@@ -8,7 +11,8 @@ public class RouteNotFoundException extends RuntimeException {
         this.id = id;
     }
 
-    public Long getId() {
-        return id;
+    public RouteNotFoundException(String s) {
+        super(s);
     }
+
 }

@@ -1,5 +1,6 @@
 package com.turismea.service;
 
+import com.turismea.exception.RouteNotFoundException;
 import com.turismea.exception.SpotNotFoundException;
 import com.turismea.model.dto.LocationDTO;
 import com.turismea.model.entity.CityDistance;
@@ -16,19 +17,16 @@ public class RouteGeneratorService {
     private final OrdenationAlgorithimService ordenationAlgorithimService;
     private final CityDistanceService cityDistanceService;
     private final RouteService routeService;
-    private final WKTService wktService;
-    private final OpenStreetMapService openStreetMapService;
+
 
     private final Map<Spot, List<CityDistance>> connectionsCache = new HashMap<>();
 
     public RouteGeneratorService(SpotService spotService, OrdenationAlgorithimService ordenationAlgorithimService,
-                                 CityDistanceService cityDistanceService, RouteService routeService, WKTService wktService, OpenStreetMapService openStreetMapService) {
+                                 CityDistanceService cityDistanceService, RouteService routeService) {
         this.spotService = spotService;
         this.ordenationAlgorithimService = ordenationAlgorithimService;
         this.cityDistanceService = cityDistanceService;
         this.routeService = routeService;
-        this.wktService = wktService;
-        this.openStreetMapService = openStreetMapService;
     }
 
     public Route generateRoute(LocationDTO initialPoint, LocationDTO finalPoint, int secTime) {
@@ -58,6 +56,12 @@ public class RouteGeneratorService {
             throw new SpotNotFoundException();
         }
 
+        long durationBetween = cityDistanceService.getDurationBetween(initialPoint,finalPoint);
+        System.out.println("La duracion entre el punto inicial y el final es: " + durationBetween);
+        if(durationBetween >= secTime) {
+            throw new RouteNotFoundException("Route time is less than the duration between initial point and destination");
+        }
+
         List<Route> listOfRoutes = traverseTheSpotGraphToGetRoutes(initialSpot, finalSpot, secTime, initialPoint, finalPoint);
         listOfRoutes = getSortedListOfRoutes(listOfRoutes);
         return listOfRoutes;
@@ -77,7 +81,6 @@ public class RouteGeneratorService {
     private void dfs(Spot current, Spot destiny, Route route, Set<Spot> visited, List<Route> result,
                      int durationMax, LocationDTO initialPoint, LocationDTO finalPoint) {
 
-        //if (result.size() > 300) return;
         if (visited.contains(current)) return;
         if (route.getDuration() > durationMax) return;
 
@@ -86,7 +89,7 @@ public class RouteGeneratorService {
         long originalDuration = route.getDuration();
 
         try {
-            if (route.getSpots().isEmpty()) {
+            if (route.getSpots().isEmpty()) { //It implies that is the first iteration
                 // Add synthetic initial point only once at the start
                 Spot initialSynthetic = spotService.getFinalOrInitialPoint(0, initialPoint);
                 route.getSpots().add(initialSynthetic);
@@ -94,13 +97,14 @@ public class RouteGeneratorService {
                 // Calculate duration from synthetic initial point to first real spot
                 long travelDuration = cityDistanceService.getDurationBetween(initialPoint,
                         new LocationDTO(current.getLatitude(), current.getLongitude()));
-                routeService.addSpotToRoute(route, current, travelDuration).block();
-            } else {
+                // Add the spot to the route
+                routeService.addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
+            } else { //For the rest of iteration
                 Spot previousSpot = route.getSpots().get(route.getSpots().size() - 1);
                 List<CityDistance> distances = cityDistanceService.getListOfCityDistancesIgnoringOrder(previousSpot, current);
                 if (!distances.isEmpty()) {
                     long travelDuration = distances.get(0).getDuration();
-                    routeService.addSpotToRoute(route, current, travelDuration).block();
+                    routeService.addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
                 } else {
                     System.err.println("⚠️ No CityDistance found between " + previousSpot.getName() + " and " + current.getName());
                     visited.remove(current);
@@ -121,7 +125,7 @@ public class RouteGeneratorService {
                         new LocationDTO(previousSpot.getLatitude(), previousSpot.getLongitude()),
                         finalPoint
                 );
-                routeService.addSpotToRoute(route, finalSynthetic, travelDuration).block();
+                routeService.addSpotToRoute(route, finalSynthetic, travelDuration, current.equals(destiny)).block();
 
                 // Final time validation after full route is constructed
                 if (route.getDuration() > durationMax) {
@@ -147,11 +151,7 @@ public class RouteGeneratorService {
                 Spot neighbor = connection.getSpotA().equals(current) ? connection.getSpotB() : connection.getSpotA();
                 long estimatedDuration = route.getDuration() + connection.getDuration() + neighbor.getAverageTime();
 
-                System.out.println("→ Checking connection: " + current.getName() + " → " + neighbor.getName() +
-                        " | Connection duration: " + connection.getDuration() + "s | Estimated total: " + estimatedDuration + "s");
-
                 if (estimatedDuration > durationMax) {
-                    System.out.println("⏭️ Skipping due to duration overflow: " + estimatedDuration + "s > " + durationMax + "s");
                     continue;
                 }
 

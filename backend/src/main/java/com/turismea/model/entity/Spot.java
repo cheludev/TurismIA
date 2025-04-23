@@ -78,8 +78,8 @@ public class Spot {
         this.routes = new ArrayList<>(spot.getRoutes());
     }
 
-    public Spot(String finalOrInitial, Double latitude, Double longitude) {
-        this.name = finalOrInitial;
+    public Spot(String name, Double latitude, Double longitude) {
+        this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.averageTime = 0;

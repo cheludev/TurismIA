@@ -56,24 +56,24 @@ public class SpotService {
         return googleSpotService.getSpots(city)
                 .flatMap(jsonResponse -> {
                     try {
+                        //Mapping de json response
                         ObjectMapper objectMapper = new ObjectMapper();
                         GooglePlacesResponse response = objectMapper.readValue(jsonResponse, GooglePlacesResponse.class);
+
                         List<Place> places = response.getPlaces();
 
                         City cityEntity = cityService.existOrCreateCity(city);
 
+                        //Getting the existing spots in order to avoid duplicates
                         List<String> existingNames = spotRepository.findAllNames();
 
                         List<Spot> spots = places.stream()
+                                //Filtering to avoid duplicates
                                 .filter(place -> !existingNames.contains(place.getName()))
                                 .map(place -> {
-                                    System.err.println("*********************"
-                                            + place.getRating());
-
-                                            System.err.println(place.getLocationDTO().getLatitude() + " " +
-                                                    place.getLocationDTO().getLongitude());
                                     Coordinate coordinate = new Coordinate(place.getLocationDTO().getLatitude(),
                                             place.getLocationDTO().getLongitude());
+                                    //We cant save a lat and long like coordinates using "Point"
                                     Point point = geometryFactory.createPoint(coordinate);
                                     return new Spot(
                                             place.getName(),
@@ -81,7 +81,7 @@ public class SpotService {
                                             place.getFormattedAddress(),
                                             place.getLocationDTO().getLatitude(),
                                             place.getLocationDTO().getLongitude(),
-                                            15,
+                                            900,
                                             false,
                                             "",
                                             new ArrayList<>(),

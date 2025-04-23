@@ -76,7 +76,7 @@ public class TurismeaApplication implements CommandLineRunner {
             spots.forEach(spot -> System.out.println(spot.toString() + "\n"));
 
             try {
-                Route route = routeGeneratorService.generateRoute(fromDTO, toDTO, 3000); // máx 1h
+                Route route = routeGeneratorService.generateRoute(fromDTO, toDTO, 734);
                 System.out.println("Generated route:");
                 route.getSpots().forEach(spot ->
                         System.out.println(" -> " + spot.getName())

@@ -67,6 +67,37 @@ public class RouteGeneratorService {
         return listOfRoutes;
     }
 
+    public Route createRoute(Route route) {
+        List<Spot> spots = route.getSpots();
+        if (spots == null || spots.size() < 2) {
+            throw new IllegalArgumentException("The route must contain at least two spots.");
+        }
+
+        long totalDuration = 0;
+
+        for (int i = 1; i < spots.size(); i++) {
+            Spot previous = spots.get(i - 1);
+            Spot current = spots.get(i);
+
+            // Get the duration between two spots from the database (CityDistance)
+            List<CityDistance> distances = cityDistanceService.getListOfCityDistancesIgnoringOrder(previous, current);
+
+            if (!distances.isEmpty()) {
+                long travelDuration = distances.get(0).getDuration();
+                totalDuration += travelDuration;
+            } else {
+                System.err.println("⚠️ No CityDistance found between " + previous.getName() + " and " + current.getName());
+            }
+
+            // Add the average visiting time of the current spot
+            totalDuration += current.getAverageTime();
+        }
+
+        route.setDuration(totalDuration);
+        return route;
+    }
+
+
     private List<Route> traverseTheSpotGraphToGetRoutes(Spot initialSpot, Spot finalSpot, int time,
                                                         LocationDTO initialPoint, LocationDTO finalPoint) {
         List<Route> result = new ArrayList<>();

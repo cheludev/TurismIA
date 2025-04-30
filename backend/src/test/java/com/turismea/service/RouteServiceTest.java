@@ -5,6 +5,7 @@ import com.turismea.exception.RouteNotFoundException;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Route;
+import com.turismea.model.entity.Spot;
 import com.turismea.model.entity.Tourist;
 import com.turismea.repository.RouteRepository;
 import com.turismea.repository.TouristRepository;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +36,10 @@ public class RouteServiceTest {
 
     @Mock
     private CityService cityService;
+
+    @Mock
+    private RouteGeneratorService routeGeneratorService;
+
 
     @InjectMocks
     private RouteService routeService;
@@ -77,59 +83,71 @@ public class RouteServiceTest {
     }
 
     @Test
-    void testEditRoute_Success() {
-        Long routeId = 1L;
+    void testEditRoute_Success() throws Exception {
         Long touristId = 2L;
-        Route existingRoute = new Route();
-        existingRoute.setId(routeId);
+
         Tourist owner = new Tourist();
         owner.setId(touristId);
-        existingRoute.setOwner(owner);
+
+        Spot spot1 = new Spot();
+        spot1.setName("Spot 1");
+        spot1.setAverageTime(100);
+
+        Spot spot2 = new Spot();
+        spot2.setName("Spot 2");
+        spot2.setAverageTime(200);
+
+        Route originalRoute = new Route();
+        originalRoute.setId(1L);
+        originalRoute.setOwner(owner);
+        originalRoute.setSpots(new LinkedList<>(List.of(spot1, spot2)));
 
         Route updatedRoute = new Route();
         updatedRoute.setName("Updated Route");
+        updatedRoute.setOwner(owner);
+        updatedRoute.setSpots(new LinkedList<>(List.of(spot1, spot2)));
 
-        when(routeRepository.findById(routeId)).thenReturn(Optional.of(existingRoute));
-        when(routeRepository.save(any(Route.class))).thenReturn(existingRoute);
+        when(touristService.findById(touristId)).thenReturn(Optional.of(owner));
 
-        Route result = routeService.editRoute(routeId, updatedRoute, touristId);
+        // Simula que routeGeneratorService.createRoute() calcula la duración correctamente
+        Route resultRoute = new Route(updatedRoute);
+        resultRoute.setDuration(500);
+        when(routeGeneratorService.createRoute(updatedRoute)).thenReturn(resultRoute);
+
+        Route result = routeService.editRoute(originalRoute, updatedRoute, touristId);
 
         assertEquals("Updated Route", result.getName());
-        verify(routeRepository).save(existingRoute);
+        assertEquals(500, result.getDuration());
+        assertEquals(2, result.getSpots().size());
+        verify(routeGeneratorService).createRoute(updatedRoute);
     }
+    
 
     @Test
-    void testEditRoute_NotTheOwner() {
-        Long routeId = 1L;
-        Long wrongTouristId = 99L;
-        Route existingRoute = new Route();
-        existingRoute.setId(routeId);
+    void testEditRoute_UserNotFound() {
+        Long touristId = 99L;
+
         Tourist owner = new Tourist();
-        owner.setId(2L);
-        existingRoute.setOwner(owner);
+        owner.setId(1L);
+
+        Spot spot = new Spot();
+        spot.setName("Spot");
+        spot.setAverageTime(100);
+
+        Route originalRoute = new Route();
+        originalRoute.setOwner(owner);
+        originalRoute.setSpots(new LinkedList<>(List.of(spot)));
 
         Route updatedRoute = new Route();
-        updatedRoute.setName("Updated Route");
+        updatedRoute.setSpots(new LinkedList<>(List.of(spot)));
 
-        when(routeRepository.findById(routeId)).thenReturn(Optional.of(existingRoute));
+        when(touristService.findById(touristId)).thenReturn(Optional.empty());
 
-        assertThrows(NotTheOwnerOfRouteException.class, () -> routeService.editRoute(routeId, updatedRoute, wrongTouristId));
+        assertThrows(UserNotFoundException.class, () -> routeService.editRoute(originalRoute, updatedRoute, touristId));
 
-        verify(routeRepository, never()).save(any(Route.class));
+        verify(routeGeneratorService, never()).createRoute(any());
     }
 
-    @Test
-    void testEditRoute_NotFound() {
-        Long routeId = 1L;
-        Long touristId = 2L;
-        Route updatedRoute = new Route();
-
-        when(routeRepository.findById(routeId)).thenReturn(Optional.empty());
-
-        assertThrows(RouteNotFoundException.class, () -> routeService.editRoute(routeId, updatedRoute, touristId));
-
-        verify(routeRepository, never()).save(any(Route.class));
-    }
 
     @Test
     void testGetSavedRoutes_TouristExists() {

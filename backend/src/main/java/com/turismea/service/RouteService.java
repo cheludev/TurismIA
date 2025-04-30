@@ -19,14 +19,15 @@ public class RouteService {
     private final RouteRepository routeRepository;
     private final TouristService touristService;
     private final CityService cityService;
+    private final RouteGeneratorService routeGeneratorService;
 
 
-
-    public RouteService(RouteRepository routeRepository, TouristService touristService, CityService cityService, CityDistanceService cityDistanceService, OpenStreetMapService openStreetMapService, WKTService wktService) {
+    public RouteService(RouteRepository routeRepository, TouristService touristService, CityService cityService, CityDistanceService cityDistanceService, OpenStreetMapService openStreetMapService, WKTService wktService, RouteGeneratorService routeGeneratorService) {
         this.routeRepository = routeRepository;
 
         this.touristService = touristService;
         this.cityService = cityService;
+        this.routeGeneratorService = routeGeneratorService;
     }
 
     public Mono<Void> addSpotToRoute(Route route, Spot newSpot, long travelTime, boolean last) {
@@ -55,23 +56,19 @@ public class RouteService {
     }
 
 
-    public Route editRoute(Long originalRouteId, Route newRoute, Long touristId) {
-        Route OGRoute = routeRepository.findById(originalRouteId)
-                .orElseThrow(() -> new RouteNotFoundException(originalRouteId));
+    public Route editRoute(Route ogRoute, Route newRoute, Long touristId) throws Exception {
 
-        if (!OGRoute.getOwner().getId().equals(touristId)) {
-            throw new NotTheOwnerOfRouteException(touristId, originalRouteId);
+        if(newRoute.getSpots().isEmpty() || ogRoute.getSpots().isEmpty()) {
+            throw new Exception("The route can not has zero spots");
         }
 
+        if(touristId == null || touristService.findById(touristId).isEmpty()) {
+            throw new UserNotFoundException(touristId);
+        }
 
-        OGRoute.setName(newRoute.getName());
-        OGRoute.setCity(newRoute.getCity());
-        OGRoute.setOwner(newRoute.getOwner());
-        OGRoute.setRate(newRoute.getRate());
-        OGRoute.setSpots(newRoute.getSpots());
-        OGRoute.setDescription(newRoute.getDescription());
+        // We have to calc the new route duration of the route
 
-        return routeRepository.save(OGRoute);
+        return routeGeneratorService.createRoute(newRoute);
     }
     public List<Route> saveRoute(Long touristId, Route route) {
         Tourist tourist = touristService.findById(touristId)

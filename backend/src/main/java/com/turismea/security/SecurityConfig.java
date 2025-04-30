@@ -27,14 +27,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // We don't need CSRF, so we disable it.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/public/**").permitAll() // Public rules
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Rutas protegidas
-                        .anyRequest().authenticated() // Todas las demás requieren autenticación
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Protected Routes
+                        .requestMatchers("/tourist/**").hasAnyRole("TOURIST", "ADMIN", "MODERATOR")
+                        .requestMatchers("/moderator/**").hasAnyRole( "ADMIN", "MODERATOR")
+                        .requestMatchers("/moderator/**").hasRole("ADMIN")
+                        .anyRequest().authenticated() // All others require authentication
                 )
-                .formLogin(login -> login // Configurar login
+                .formLogin(login -> login // Login configuration
                         .loginPage("/login")
                         .permitAll()
                 )
-                .logout(LogoutConfigurer::permitAll); // Configurar logout
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                ); // Configurar logout
 
         return http.build();
     }

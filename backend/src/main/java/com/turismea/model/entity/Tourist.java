@@ -7,6 +7,7 @@ import lombok.Setter;
 
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "tourist")
@@ -20,4 +21,16 @@ public class Tourist extends User{
     @OneToOne
     private Request promoteToModeratorRequest;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tourist tourist = (Tourist) o;
+        return Objects.equals(this.getUsername(), tourist.getUsername());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }

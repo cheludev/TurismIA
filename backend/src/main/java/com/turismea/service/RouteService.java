@@ -22,37 +22,14 @@ public class RouteService {
     private final RouteGeneratorService routeGeneratorService;
 
 
-    public RouteService(RouteRepository routeRepository, TouristService touristService, CityService cityService, CityDistanceService cityDistanceService, OpenStreetMapService openStreetMapService, WKTService wktService, RouteGeneratorService routeGeneratorService) {
+    public RouteService(RouteRepository routeRepository, TouristService touristService, CityService cityService,
+                        CityDistanceService cityDistanceService, OpenStreetMapService openStreetMapService,
+                        WKTService wktService, RouteGeneratorService routeGeneratorService) {
         this.routeRepository = routeRepository;
 
         this.touristService = touristService;
         this.cityService = cityService;
         this.routeGeneratorService = routeGeneratorService;
-    }
-
-    public Mono<Void> addSpotToRoute(Route route, Spot newSpot, long travelTime, boolean last) {
-        List<Spot> spots = route.getSpots();
-
-        if (spots.isEmpty() || last) {
-            spots.add(newSpot);
-            System.out.println(last? "⭕⬅\uFE0F Last" : "⭕⬅\uFE0F First" + " spot added" +
-                    " | Total route duration: " + route.getDuration() + "s");
-            return Mono.empty();
-        }
-
-        Spot previousSpot = spots.get(spots.size() - 1);
-
-        long newDuration = route.getDuration() + travelTime + newSpot.getAverageTime();
-        route.setDuration(newDuration);
-        spots.add(newSpot);
-
-        System.out.println("✅ Spot added: " + newSpot.getName() +
-                "\n   ├─ From: " + previousSpot.getName() +
-                "\n   ├─ Travel time: " + travelTime + "s" +
-                "\n   ├─ Spot avg. visit time: " + newSpot.getAverageTime() + "s" +
-                "\n   └─ New total route duration: " + newDuration + "s");
-
-        return Mono.empty();
     }
 
 

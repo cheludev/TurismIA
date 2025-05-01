@@ -5,6 +5,8 @@ import com.turismea.model.entity.User;
 import com.turismea.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,7 +22,10 @@ public class SecurityConfig {
     public SecurityConfig(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -53,4 +58,6 @@ public class SecurityConfig {
         User user = userRepository.findById(id).orElse(null);
         return user == null? null : user.getRole();
     }
+
+
 }

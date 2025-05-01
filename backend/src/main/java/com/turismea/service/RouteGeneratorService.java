@@ -6,7 +6,9 @@ import com.turismea.model.dto.LocationDTO;
 import com.turismea.model.entity.CityDistance;
 import com.turismea.model.entity.Route;
 import com.turismea.model.entity.Spot;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -16,17 +18,39 @@ public class RouteGeneratorService {
     private final SpotService spotService;
     private final OrdenationAlgorithimService ordenationAlgorithimService;
     private final CityDistanceService cityDistanceService;
-    private final RouteService routeService;
-
 
     private final Map<Spot, List<CityDistance>> connectionsCache = new HashMap<>();
 
     public RouteGeneratorService(SpotService spotService, OrdenationAlgorithimService ordenationAlgorithimService,
-                                 CityDistanceService cityDistanceService, RouteService routeService) {
+                                 CityDistanceService cityDistanceService) {
         this.spotService = spotService;
         this.ordenationAlgorithimService = ordenationAlgorithimService;
         this.cityDistanceService = cityDistanceService;
-        this.routeService = routeService;
+    }
+
+    public Mono<Void> addSpotToRoute(Route route, Spot newSpot, long travelTime, boolean last) {
+        List<Spot> spots = route.getSpots();
+
+        if (spots.isEmpty() || last) {
+            spots.add(newSpot);
+            System.out.println(last? "⭕⬅\uFE0F Last" : "⭕⬅\uFE0F First" + " spot added" +
+                    " | Total route duration: " + route.getDuration() + "s");
+            return Mono.empty();
+        }
+
+        Spot previousSpot = spots.get(spots.size() - 1);
+
+        long newDuration = route.getDuration() + travelTime + newSpot.getAverageTime();
+        route.setDuration(newDuration);
+        spots.add(newSpot);
+
+        System.out.println("✅ Spot added: " + newSpot.getName() +
+                "\n   ├─ From: " + previousSpot.getName() +
+                "\n   ├─ Travel time: " + travelTime + "s" +
+                "\n   ├─ Spot avg. visit time: " + newSpot.getAverageTime() + "s" +
+                "\n   └─ New total route duration: " + newDuration + "s");
+
+        return Mono.empty();
     }
 
     public Route generateRoute(LocationDTO initialPoint, LocationDTO finalPoint, int secTime) {
@@ -129,13 +153,13 @@ public class RouteGeneratorService {
                 long travelDuration = cityDistanceService.getDurationBetween(initialPoint,
                         new LocationDTO(current.getLatitude(), current.getLongitude()));
                 // Add the spot to the route
-                routeService.addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
+                addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
             } else { //For the rest of iteration
                 Spot previousSpot = route.getSpots().get(route.getSpots().size() - 1);
                 List<CityDistance> distances = cityDistanceService.getListOfCityDistancesIgnoringOrder(previousSpot, current);
                 if (!distances.isEmpty()) {
                     long travelDuration = distances.get(0).getDuration();
-                    routeService.addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
+                    addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
                 } else {
                     System.err.println("⚠️ No CityDistance found between " + previousSpot.getName() + " and " + current.getName());
                     visited.remove(current);
@@ -156,7 +180,7 @@ public class RouteGeneratorService {
                         new LocationDTO(previousSpot.getLatitude(), previousSpot.getLongitude()),
                         finalPoint
                 );
-                routeService.addSpotToRoute(route, finalSynthetic, travelDuration, current.equals(destiny)).block();
+                addSpotToRoute(route, finalSynthetic, travelDuration, current.equals(destiny)).block();
 
                 // Final time validation after full route is constructed
                 if (route.getDuration() > durationMax) {

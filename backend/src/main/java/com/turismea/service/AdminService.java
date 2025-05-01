@@ -38,4 +38,8 @@ public class AdminService {
     public Admin save(Admin admin) {
         return adminRepository.save(admin);
     }
+
+    public Optional<Admin> findById(Long userId) {
+        return adminRepository.findById(userId);
+    }
 }

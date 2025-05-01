@@ -81,6 +81,16 @@ public class TouristService {
         return touristRepository.save(tourist);
     }
 
+    public Tourist existByUsername(String username) {
+        if(username.isEmpty()) {
+        }
+        if(touristRepository.findByUsername(username).isPresent()){
+            return touristRepository.findByUsername(username).get();
+        } else {
+            throw new UserNotFoundException(username);
+        }
+    }
+
     public Optional<Tourist> findById(Long touristId) {
         return touristRepository.findById(touristId);
     }

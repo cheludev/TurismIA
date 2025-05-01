@@ -16,11 +16,9 @@ public class RequestService {
 
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
-    private final UserService userService;
-    RequestService(RequestRepository requestRepository, UserRepository userRepository, UserService userService) {
+    RequestService(RequestRepository requestRepository, UserRepository userRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
-        this.userService = userService;
     }
 
     public Request createRequest(User user, RequestType type, String reasonsOfTheRequest, Province province) {
@@ -43,7 +41,7 @@ public class RequestService {
 
         request.setRequestStatus(requestStatus);
         requestRepository.save(request);
-        userService.updateUser(user);
+        userRepository.save(user);
     }
 
     public User approveRequest(Request request, User user, Province province) {

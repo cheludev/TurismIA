@@ -15,6 +15,8 @@ import com.turismea.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class ModeratorService {
 
@@ -64,6 +66,14 @@ public class ModeratorService {
         return userService.existUserById(id);
     }
 
+    public Moderator save(Moderator moderator) {
+        if(moderatorRepository.existsByUsername(moderator.getUsername())){
+            throw new UserNotFoundException(moderator.getUsername());
+        } else {
+           return moderatorRepository.save(moderator);
+        }
+    }
+
     public boolean applyToChangeTheProvince(Long moderatorId, Province newProvince, String reasons) {
         Moderator moderator = moderatorRepository.findById(moderatorId).orElseThrow(() -> new UserNotFoundException(moderatorId));
         if (newProvince == Province.NO_PROVINCE) {
@@ -80,4 +90,7 @@ public class ModeratorService {
     }
 
 
+    public Optional<Moderator> findById(Long userId) {
+        return moderatorRepository.findById(userId);
+    }
 }

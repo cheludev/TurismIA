@@ -93,19 +93,19 @@ class UserServiceTest {
     }
 
     @Test
-    void testExistUsername_UserExists_ReturnsTrue() {
+    void testExistByUsername_UserExists_ReturnsTrue() {
         when(userRepository.existsUserByUsername("existingUser")).thenReturn(true);
 
-        boolean result = userService.existUsername("existingUser");
+        boolean result = userService.existByUsername("existingUser");
 
         assertTrue(result);
     }
 
     @Test
-    void testExistUsername_UserDoesNotExist_ReturnsFalse() {
+    void testExistUsername_UserDoesNotExist_By_ReturnsFalse() {
         when(userRepository.existsUserByUsername("nonExistentUser")).thenReturn(false);
 
-        boolean result = userService.existUsername("nonExistentUser");
+        boolean result = userService.existByUsername("nonExistentUser");
 
         assertFalse(result);
     }

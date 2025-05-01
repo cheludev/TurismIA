@@ -29,4 +29,17 @@ public class Admin extends User {
     }
 
 
+    public Admin(User user) {
+        this.setId(user.getId());
+        this.setUsername(user.getUsername());
+        this.setPassword(user.getPassword());
+        this.setEmail(user.getEmail());
+        this.setFirstName(user.getFirstName());
+        this.setLastName(user.getLastName());
+        this.setPhoto(user.getPhoto());
+        this.setProvince(user.getProvince());
+        this.setRole(user.getRole());
+        this.setAppliedToModerator(this.appliedToModerator);
+        this.setAppliedToChangeTheProvince(this.appliedToChangeTheProvince);
+    }
 }

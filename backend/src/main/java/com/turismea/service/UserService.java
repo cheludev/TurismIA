@@ -1,7 +1,11 @@
 package com.turismea.service;
 
 import com.turismea.exception.UserNotFoundException;
+import com.turismea.model.entity.Admin;
+import com.turismea.model.entity.Moderator;
+import com.turismea.model.entity.Tourist;
 import com.turismea.model.entity.User;
+import com.turismea.repository.AdminRepository;
 import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.TouristRepository;
 import com.turismea.repository.UserRepository;
@@ -15,27 +19,39 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TouristRepository touristRepository;
+    private final ModeratorRepository moderatorRepository;
+    private final AdminRepository adminRepository;
+    private final UserTypeCreator userTypeCreator;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TouristRepository touristRepository, ModeratorRepository moderatorRepository) {
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AdminRepository adminRepository,
+                       TouristRepository touristRepository, ModeratorRepository moderatorRepository, UserTypeCreator userTypeCreator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.touristRepository = touristRepository;
+        this.moderatorRepository = moderatorRepository;
+
+
+        this.adminRepository = adminRepository;
+        this.userTypeCreator = userTypeCreator;
     }
 
     public User signUp(User user) {
 
-        if(user.getUsername().isEmpty() || user.getPassword().isEmpty() || user.getUsername() == null || user.getPassword() == null){
+        if(user.getUsername() == null || user.getPassword() == null
+                || user.getUsername().isEmpty() || user.getPassword().isEmpty()){
             return null;
         }
 
         if(userRepository.existsUserByUsername(user.getUsername())
                 || userRepository.existsUserByEmail(user.getEmail())) {
-          return null;
+            return null;
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
 
-        return user;
+        return userRepository.save(user);
     }
 
     public User logIn(String username, String rawPassWord) {
@@ -51,7 +67,7 @@ public class UserService {
         return null;
     }
 
-    public boolean existUsername(String username) {
+    public boolean existByUsername(String username) {
         if(username.isEmpty()){
             return false;
         }
@@ -72,26 +88,30 @@ public class UserService {
         return password1.equals(password2);
     }
 
-//    @Transactional
-//    public void updateUser(Long id, String firstName, String lastName, String username,
-//                           String email, String password, Role role, byte[] photo) {
-//        int rowsAffected = userRepository.updateUser(id, firstName, lastName, username, email, password, role, photo);
-//        if (rowsAffected == 0) {
-//            throw new UserNotFoundException(id);
-//        }
-//    }
 
     @Transactional
-    public void updateUser(User user) {
-        if(user.getUsername().isEmpty() || user.getPassword().isEmpty() || user.getUsername() == null || user.getPassword() == null){
+    public User updateUser(User user) {
+        if(user.getUsername() == null || user.getPassword() == null){
             throw new UserNotFoundException(user.getId());
         }
+
         if (!userRepository.existsById(user.getId())) {
             throw new UserNotFoundException(user.getId());
         }
 
-        userRepository.save(user);
+        User existing = userRepository.findById(user.getId()).orElseThrow();
+
+        existing.setEmail(user.getEmail());
+        existing.setUsername(user.getUsername());
+        existing.setFirstName(user.getFirstName());
+        existing.setLastName(user.getLastName());
+        existing.setProvince(user.getProvince());
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        return userRepository.save(existing);
     }
+
 
     public boolean existUserById(long id){
         return userRepository.existsUserById(id);
@@ -104,4 +124,58 @@ public class UserService {
     public Optional<User> findUserByUsername(String username){
         return userRepository.findByUsername(username);
     }
+
+    public boolean checkPasswd(String encodedPasswd, String rawPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPasswd);
+    }
+
+    public boolean existsUserByUsername(String username) {
+        return userRepository.existsUserByUsername(username);
+    }
+
+    public Tourist getTourist(Long userId) {
+        Tourist tourist = touristRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Tourist not found"));
+
+        tourist.getSavedRoutes().size();
+
+        return tourist;
+    }
+
+
+    public Moderator getModerator(Long userId) {
+        return moderatorRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Moderator not found"));
+    }
+
+    public Admin getAdmin(Long userId) {
+        return adminRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Admin not found"));
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            switch (user.getRole()) {
+                case TOURIST -> {
+                    touristRepository.deleteById(id);
+                }
+                case MODERATOR -> {
+                    moderatorRepository.deleteById(id);
+                }
+                case ADMIN -> {
+                    adminRepository.deleteById(id);
+                }
+            }
+
+            userRepository.deleteById(id);
+
+        } else {
+            throw new UserNotFoundException("User with id " + id + " not found");
+        }
+    }
+
 }

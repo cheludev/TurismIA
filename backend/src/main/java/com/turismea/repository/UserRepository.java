@@ -29,4 +29,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "u.email = :email, u.password = :password, u.role = :role, u.photo = :photo WHERE u.id = :id")
     int updateUser(Long id, String firstName, String lastName, String username,
                    String email, String password, Role role, byte[] photo);
+
+    boolean existsByUsernameAndPassword(String username, String password);
+
 }

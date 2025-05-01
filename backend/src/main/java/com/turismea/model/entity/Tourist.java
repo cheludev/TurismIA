@@ -15,11 +15,25 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 public class Tourist extends User{
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Route> savedRoutes;
 
     @OneToOne
     private Request promoteToModeratorRequest;
+
+    public Tourist(User user) {
+        this.setId(user.getId());
+        this.setUsername(user.getUsername());
+        this.setPassword(user.getPassword());
+        this.setEmail(user.getEmail());
+        this.setFirstName(user.getFirstName());
+        this.setLastName(user.getLastName());
+        this.setPhoto(user.getPhoto());
+        this.setProvince(user.getProvince());
+        this.setRole(user.getRole());
+        this.setSavedRoutes(this.savedRoutes);
+    }
+
 
     @Override
     public boolean equals(Object o) {

@@ -1,4 +1,4 @@
-package com.turismea.model.dto.osrmDistanceDTO;
+package com.turismea.model.dto.OsrmDistanceDTO;
 
 import lombok.Data;
 import lombok.Setter;

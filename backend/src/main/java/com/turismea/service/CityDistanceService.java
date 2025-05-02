@@ -1,7 +1,7 @@
 package com.turismea.service;
 
 import com.turismea.model.dto.LocationDTO;
-import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
+import com.turismea.model.dto.OsrmDistanceDTO.RouteDTO;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.CityDistance;
 import com.turismea.model.entity.Spot;
@@ -9,7 +9,6 @@ import com.turismea.repository.CityDistanceRepository;
 import com.turismea.repository.RouteRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 

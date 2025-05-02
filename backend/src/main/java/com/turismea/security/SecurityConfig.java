@@ -39,12 +39,12 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/signup").permitAll()
-                        .requestMatchers("/api/users/**").permitAll()
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/tourist/**").hasAnyRole("TOURIST", "ADMIN", "MODERATOR")
-                        .requestMatchers("/moderator/**").hasAnyRole("ADMIN", "MODERATOR")
+//                        .requestMatchers("/api/users/signup").permitAll()
+//                        .requestMatchers("/api/users/**").permitAll()
+//                        .requestMatchers("/public/**").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/tourist/**").hasAnyRole("TOURIST", "ADMIN", "MODERATOR")
+//                        .requestMatchers("/moderator/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())

@@ -3,11 +3,12 @@ package com.turismea.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.turismea.exception.SpotNotFoundException;
 import com.turismea.model.dto.LocationDTO;
-import com.turismea.model.dto.placesDTO.GooglePlacesResponse;
-import com.turismea.model.dto.placesDTO.Place;
+import com.turismea.model.dto.PlacesDTO.GooglePlacesResponse;
+import com.turismea.model.dto.PlacesDTO.Place;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
 import com.turismea.repository.SpotRepository;
+import jakarta.transaction.Transactional;
 import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.Coordinate;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,13 +32,16 @@ public class SpotService {
         this.cityService = cityService;
     }
 
-    public void validateSpot(Spot spot){
-        spotRepository.findById(spot.getId())
-                        .orElseThrow(() -> new SpotNotFoundException(spot.getId()));
-        spot.setValidated(true);
-        spotRepository.save(spot);
+    @Transactional
+    public void validateSpot(Long spotId) {
+        Spot spot = spotRepository.findById(spotId)
+                .orElseThrow(() -> new SpotNotFoundException(spotId));
 
+        if (!spot.isValidated()) {
+            spot.setValidated(true);
+        }
     }
+
 
     public Spot newTouristicSpot(Long locationId, String touristicInfo) {
         Spot spot = spotRepository.findById(locationId)
@@ -156,4 +159,7 @@ public class SpotService {
         return new Spot(finalOrInitial, locationDTO.getLatitude(), locationDTO.getLongitude());
     }
 
+    public Optional<Spot> findById(Long id) {
+        return spotRepository.findById(id);
+    }
 }

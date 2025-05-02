@@ -1,8 +1,8 @@
 package com.turismea.service;
 
 import com.turismea.model.dto.LocationDTO;
-import com.turismea.model.dto.osrmDistanceDTO.OsrmResponse;
-import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
+import com.turismea.model.dto.OsrmDistanceDTO.OsrmResponse;
+import com.turismea.model.dto.OsrmDistanceDTO.RouteDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;

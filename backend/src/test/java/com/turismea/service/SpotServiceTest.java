@@ -62,7 +62,7 @@ public class SpotServiceTest {
 
         when(spotRepository.findById(1L)).thenReturn(Optional.of(spot));
 
-        spotService.validateSpot(spot);
+        spotService.validateSpot(spot.getId());
 
         assertTrue(spot.isValidated());
         verify(spotRepository).save(spot);
@@ -76,7 +76,7 @@ public class SpotServiceTest {
 
         when(spotRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(SpotNotFoundException.class, () -> spotService.validateSpot(spot));
+        assertThrows(SpotNotFoundException.class, () -> spotService.validateSpot(spot.getId()));
 
         verify(spotRepository, never()).save(any(Spot.class));
     }

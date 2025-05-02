@@ -1,4 +1,4 @@
-package com.turismea.model.dto.placesDTO;
+package com.turismea.model.dto.PlacesDTO;
 
 import lombok.Getter;
 

@@ -1,16 +1,10 @@
 package com.turismea.service;
 
 import com.turismea.exception.*;
-import com.turismea.exception.NotTheOwnerOfRouteException;
-import com.turismea.model.dto.LocationDTO;
-import com.turismea.model.dto.osrmDistanceDTO.RouteDTO;
 import com.turismea.model.entity.*;
 import com.turismea.repository.RouteRepository;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 

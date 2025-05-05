@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -114,8 +115,14 @@ public class SpotService {
         spotRepository.delete(spot);
     }
 
-    public List<Spot> getValidatedSpotByCity(City city) {
-        return spotRepository.getSpotByValidatedAndCity(true, city);
+    public List<Spot> getValidatedSpotByCity(String city) {
+        Optional<City> cityC = cityService.findByName(city);
+
+        if(cityC.isPresent()) {
+            return spotRepository.getSpotByValidatedAndCity(true, cityC.get());
+        } else {
+            throw new SpotNotFoundException();
+        }
     }
 
     public List<Spot> getUnValidatedSpotByCity(City city) {
@@ -159,7 +166,12 @@ public class SpotService {
         return new Spot(finalOrInitial, locationDTO.getLatitude(), locationDTO.getLongitude());
     }
 
+
     public Optional<Spot> findById(Long id) {
         return spotRepository.findById(id);
+    }
+
+    public boolean exitsById(Long id) {
+        return spotRepository.existsById(id);
     }
 }

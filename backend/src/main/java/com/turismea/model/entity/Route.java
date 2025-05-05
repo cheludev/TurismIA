@@ -28,7 +28,7 @@ public class Route {
     @JoinColumn(name = "owner_id")
     private Tourist owner;
 
-    private int rate;
+    private double rate;
     private long duration;
 
     @OneToOne(mappedBy = "route")
@@ -40,7 +40,7 @@ public class Route {
             joinColumns = @JoinColumn(name = "route_id"),  // Foreign key -> Route
             inverseJoinColumns = @JoinColumn(name = "location_id") // Foreign key -> Spot
     )
-    private LinkedList<Spot> spots; //We create an intermediate table which contains the relation between Routes and they spots.
+    private List<Spot> spots; //We create an intermediate table which contains the relation between Routes and they spots.
 
     @Column(columnDefinition = "TEXT")
     @Lob

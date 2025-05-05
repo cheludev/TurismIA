@@ -1,5 +1,7 @@
 package com.turismea.controller;
 
+import com.turismea.model.api_response.ApiResponse;
+import com.turismea.model.api_response.ApiResponseUtils;
 import com.turismea.model.dto.SpotDTO.SpotResponseDTO;
 import com.turismea.model.entity.Spot;
 import com.turismea.service.CityService;
@@ -19,73 +21,67 @@ import java.util.Optional;
 public class SpotController {
 
     private final SpotService spotService;
-    private final CityService cityService;
-    private final ReportService reportService;
 
-    public SpotController(SpotService spotService, CityService cityService, ReportService reportService) {
+    public SpotController(SpotService spotService) {
         this.spotService = spotService;
-        this.cityService = cityService;
-        this.reportService = reportService;
+
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> listSpots(){
-        List<Spot> spots =  spotService.getAllSpots();
-        if(spots.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    Map.of(
-                            "status", "success",
-                            "message", "No spots created yet",
-                            "body", List.of()
-                    )
-            );
+    public ResponseEntity<?> listSpots() {
+        List<Spot> spots = spotService.getAllSpots();
+
+        if (spots.isEmpty()) {
+            return ApiResponseUtils.badRequest("No spots created yet");
         } else {
             List<SpotResponseDTO> spotResponse = spots.stream().map(SpotResponseDTO::new).toList();
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    Map.of(
-                            "status", "success",
-                            "message", "List of spots",
-                            "body", spotResponse
-                    )
-            );
+            return ApiResponseUtils.success("List of spots", spotResponse);
         }
     }
+    @GetMapping("/validated/{city}")
+    public ResponseEntity<?> listSpots(@PathVariable("city") String city) {
+        List<Spot> spots = spotService.getValidatedSpotByCity(city);
+
+        if (spots.isEmpty()) {
+            return ApiResponseUtils.badRequest("No spots created yet");
+        } else {
+            List<SpotResponseDTO> spotResponse = spots.stream().map(SpotResponseDTO::new).toList();
+            return ApiResponseUtils.success("List of spots", spotResponse);
+        }
+    }
+
 
     @PutMapping("/{id}/validate")
-    public ResponseEntity<?> validateSpot(@PathVariable Long id){
+    public ResponseEntity<?> validateSpot(@PathVariable Long id) {
         Optional<Spot> spotOptional = spotService.findById(id);
-        Spot spot = new Spot();
 
-        if(spotOptional.isPresent()) {
-            spot = spotOptional.get();
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    Map.of(
-                            "status", "error",
-                            "message", "The spot does not exist"
-                    )
-            );
+        if (spotOptional.isEmpty()) {
+            return ApiResponseUtils.notFound("The spot does not exist");
         }
 
-        if(spot.isValidated()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    Map.of(
-                            "status", "error",
-                            "message", "The spot is already validated"
-                    )
-            );
-        } else {
-            spotService.validateSpot(id);
-            SpotResponseDTO spt = spotService.findById(id).map(SpotResponseDTO::new).get();
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    Map.of(
-                            "status", "success",
-                            "message", "Spot has been validated",
-                            "body", spt
-                    )
-            );
+        Spot spot = spotOptional.get();
+
+        if (spot.isValidated()) {
+            return ApiResponseUtils.conflict("The spot is already validated");
         }
 
+        spotService.validateSpot(id);
+        SpotResponseDTO spt = spotService.findById(id).map(SpotResponseDTO::new).get();
+
+        return ApiResponseUtils.success("Spot has been validated", spt);
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteSpot(@PathVariable("id") Long id) {
+        Optional<Spot> optionalSpot = spotService.findById(id);
+        if(optionalSpot.isPresent()) {
+            spotService.deleteSpot(optionalSpot.get());
+            return spotService.exitsById(id)?
+                    ApiResponseUtils.success("Spot " + id + " has been deleted successfully")
+                    :
+                    ApiResponseUtils.internalServerError("An error was occurred trying to delete the spot");
+        } else {
+            return ApiResponseUtils.notFound("The spot was not found successfully");
+        }
+    }
 }

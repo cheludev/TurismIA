@@ -23,8 +23,8 @@ public class CityService {
         cityRepository.delete(city);
     }
 
-    public Optional<Optional<City>> findByName(String city) {
-        return Optional.ofNullable(cityRepository.findByName(city));
+    public Optional<City> findByName(String city) {
+        return cityRepository.findByName(city);
     }
 
     public City save(City city) {

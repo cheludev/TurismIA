@@ -127,7 +127,7 @@ public class RouteGeneratorService {
         List<Route> result = new ArrayList<>();
         Set<Spot> visited = new HashSet<>();
         Route actualRoute = new Route();
-        actualRoute.setSpots(new LinkedList<>());
+        actualRoute.setSpots(new ArrayList<>());
 
         dfs(initialSpot, finalSpot, actualRoute, visited, result, time, initialPoint, finalPoint);
         return result;
@@ -185,7 +185,7 @@ public class RouteGeneratorService {
                 // Final time validation after full route is constructed
                 if (route.getDuration() > durationMax) {
                     System.out.println("⚠️ Skipping final route due to total duration overflow: " + route.getDuration() + "s > " + durationMax + "s");
-                    route.getSpots().removeLast(); // Remove Final Point before backtracking
+                    route.getSpots().remove(route.getSpots().size()-1); // Remove Final Point before backtracking
                     route.setDuration(originalDuration);
                     visited.remove(current);
                     return;
@@ -217,7 +217,7 @@ public class RouteGeneratorService {
         visited.remove(current);
         route.setDuration(originalDuration);
         while (route.getSpots().size() > originalSize) {
-            Spot removed = route.getSpots().removeLast();
+            Spot removed = route.getSpots().remove(route.getSpots().size() - 1);
             System.out.println("↩️ Backtracking: removing spot " + removed.getName());
         }
     }

@@ -1,19 +1,25 @@
 package com.turismea.service;
 
 import com.turismea.exception.UserNotFoundException;
-import com.turismea.model.entity.Admin;
-import com.turismea.model.entity.Moderator;
-import com.turismea.model.entity.Tourist;
-import com.turismea.model.entity.User;
+import com.turismea.model.entity.*;
 import com.turismea.repository.AdminRepository;
 import com.turismea.repository.ModeratorRepository;
 import com.turismea.repository.TouristRepository;
 import com.turismea.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static com.mysql.cj.conf.PropertyKey.logger;
+import static org.hibernate.internal.CoreLogging.logger;
 
 @Service
 public class UserService {
@@ -134,13 +140,10 @@ public class UserService {
     }
 
     public Tourist getTourist(Long userId) {
-        Tourist tourist = touristRepository.findById(userId)
+        return touristRepository.findByIdWithSavedRoutes(userId)
                 .orElseThrow(() -> new UserNotFoundException("Tourist not found"));
-
-        tourist.getSavedRoutes().size();
-
-        return tourist;
     }
+
 
 
     public Moderator getModerator(Long userId) {
@@ -152,6 +155,25 @@ public class UserService {
         return adminRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Admin not found"));
     }
+
+    public User getUserFromAuth() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new UsernameNotFoundException("No authenticated user found");
+        }
+
+        String username;
+        if (auth.getPrincipal() instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        } else {
+            username = auth.getName();
+        }
+
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+
 
     @Transactional
     public void deleteUser(Long id) {

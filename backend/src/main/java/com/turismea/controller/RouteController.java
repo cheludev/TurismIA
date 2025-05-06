@@ -7,6 +7,8 @@ import com.turismea.model.api_response.ApiResponseUtils;
 import com.turismea.model.dto.RouteDTO.*;
 import com.turismea.model.dto.SpotDTO.SpotResponseDTO;
 import com.turismea.model.entity.*;
+import com.turismea.model.enumerations.Role;
+import com.turismea.repository.RouteRepository;
 import com.turismea.service.*;
 
 import org.springframework.http.ResponseEntity;
@@ -23,14 +25,18 @@ public class RouteController {
     private final TouristService touristService;
     private final SpotService spotService;
     private final RouteService routeService;
+    private final RouteRepository routeRepository;
+    private final UserService userService;
 
     public RouteController(RouteGeneratorService routeGeneratorService, TouristService touristService,
-                           SpotService spotService, RouteService routeService, CityService cityService) {
+                           SpotService spotService, RouteService routeService, CityService cityService, RouteRepository routeRepository, UserService userService) {
         this.routeGeneratorService = routeGeneratorService;
         this.cityService = cityService;
         this.touristService = touristService;
         this.spotService = spotService;
         this.routeService = routeService;
+        this.routeRepository = routeRepository;
+        this.userService = userService;
     }
 
     @PostMapping("/new")
@@ -160,6 +166,25 @@ public class RouteController {
                 new RouteResponseDTO(fullRoute)
         );
     }
+
+
+
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteRoute(@PathVariable("id") Long id) {
+        User user = userService.getUserFromAuth();
+        Optional<Route> optionalRoute = routeRepository.findByIdAndOwner_Id(id, user.getId());
+
+        if (optionalRoute.isPresent()) {
+            routeService.deleteRoute(id);
+            return ApiResponseUtils.success("Route deleted satisfactory");
+        } else {
+            return ApiResponseUtils.badRequest("Route not found or does not belong to current user.");
+        }
+    }
+
+
 
 
 

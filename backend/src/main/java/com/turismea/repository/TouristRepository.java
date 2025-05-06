@@ -16,13 +16,15 @@ import java.util.Optional;
 
 public interface TouristRepository extends JpaRepository<Tourist, Long> {
 
-    @Query(value = "SELECT t.savedRoutes FROM Tourist t WHERE t.id = :id")
-    public List<Route> getSavedRoutes(@Param("id") Long id);
-
     boolean existsTouristByUsername(String username);
 
     boolean existsTouristByEmail(String email);
 
     Optional<Tourist> findByUsername(String username);
+
+    @Query("SELECT t FROM Tourist t LEFT JOIN FETCH t.savedRoutes WHERE t.id = :id")
+    Optional<Tourist> findByIdWithSavedRoutes(@Param("id") Long id);
+
+
 
 }

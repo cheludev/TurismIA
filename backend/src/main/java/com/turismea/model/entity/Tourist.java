@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,9 +15,20 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Tourist extends User{
+public class Tourist extends User {
+
+    // Rutas que el turista HA CREADO (es el owner)
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Route> savedRoutes;
+    private List<Route> createdRoutes = new ArrayList<>();
+
+    // Rutas que el turista HA GUARDADO (favoritas)
+    @ManyToMany
+    @JoinTable(
+            name = "tourist_saved_routes",
+            joinColumns = @JoinColumn(name = "tourist_id"),
+            inverseJoinColumns = @JoinColumn(name = "route_id")
+    )
+    private List<Route> savedRoutes = new ArrayList<>();
 
     @OneToOne
     private Request promoteToModeratorRequest;
@@ -31,9 +43,9 @@ public class Tourist extends User{
         this.setPhoto(user.getPhoto());
         this.setProvince(user.getProvince());
         this.setRole(user.getRole());
-        this.setSavedRoutes(this.savedRoutes);
+        this.setSavedRoutes(new ArrayList<>());
+        this.setCreatedRoutes(new ArrayList<>());
     }
-
 
     @Override
     public boolean equals(Object o) {

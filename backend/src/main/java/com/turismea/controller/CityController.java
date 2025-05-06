@@ -10,6 +10,7 @@ import com.turismea.service.CityService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -25,6 +26,7 @@ public class CityController {
         this.cityService = cityService;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @PostMapping("/new")
     public ResponseEntity<?> createCity(@Valid @RequestBody CityDTO newCityDTO) {
         Optional<City> existingCityOpt = cityService.getCityByName(newCityDTO.getName());

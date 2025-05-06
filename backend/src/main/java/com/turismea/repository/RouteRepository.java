@@ -32,5 +32,7 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @EntityGraph(attributePaths = "spots")
     List<Route> findByOwner_IdAndDraft(Long id, boolean draft);
+
+    Optional<Route> findByIdAndOwner_Id(Long id, Long id1);
 }
 

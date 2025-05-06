@@ -7,10 +7,7 @@ import com.turismea.model.api_response.ApiResponse;
 import com.turismea.model.api_response.ApiResponseUtils;
 import com.turismea.model.dto.LoginRequest;
 import com.turismea.model.dto.UserDTO;
-import com.turismea.model.entity.Admin;
-import com.turismea.model.entity.Moderator;
-import com.turismea.model.entity.Tourist;
-import com.turismea.model.entity.User;
+import com.turismea.model.entity.*;
 import com.turismea.model.enumerations.Role;
 import com.turismea.security.CustomUserDetails;
 import com.turismea.security.RepositoryUserDetailsService;
@@ -26,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,6 +48,12 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable("id") long idUser) {
+        User authUser = userService.getUserFromAuth();
+
+        if (!authUser.getId().equals(idUser) && !authUser.getRole().equals(Role.ADMIN)) {
+            return ApiResponseUtils.unauthorized("You can't access other user's data");
+        }
+
         Optional<User> userOptional = userService.findUserById(idUser);
         if (userOptional.isPresent()) {
             return ApiResponseUtils.success(
@@ -58,6 +62,7 @@ public class UserController {
             return ApiResponseUtils.notFound("User with id " + idUser + " not found");
         }
     }
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody User user) {
@@ -112,22 +117,40 @@ public class UserController {
         User user = customUserDetails.getUser();
 
         Map<String, Object> response = new HashMap<>();
-        response.put("id", user.getId());
-        response.put("username", user.getUsername());
-        response.put("email", user.getEmail());
-        response.put("role", user.getRole().name());
+        UserDTO userDTO = new UserDTO(user);
+
+        response.put("user", userDTO);  
 
         switch (user.getRole()) {
-            case TOURIST -> response.put("savedRoutes", userService.getTourist(user.getId()).getSavedRoutes());
-            case MODERATOR -> response.put("provinceChangesRequest", userService.getModerator(user.getId()).getChangeProvinceRequest());
-            case ADMIN -> response.put("requestsToAppliedToChangeTheProvince", userService.getAdmin(user.getId()).getAppliedToChangeTheProvince());
+            case TOURIST -> {
+                Tourist tourist = userService.getTourist(user.getId());
+                List<Long> savedRouteIds = tourist.getSavedRoutes().stream()
+                        .map(Route::getId)
+                        .toList();
+                response.put("savedRoutes", savedRouteIds);
+            }
+            case MODERATOR -> {
+                var moderator = userService.getModerator(user.getId());
+                response.put("provinceChangesRequest", moderator.getChangeProvinceRequest());
+            }
+            case ADMIN -> {
+                var admin = userService.getAdmin(user.getId());
+                response.put("requestsToAppliedToChangeTheProvince", admin.getAppliedToChangeTheProvince());
+            }
         }
 
         return ApiResponseUtils.success("Authenticated user data", response);
     }
 
+
     @PutMapping("/{id}")
     public ResponseEntity<?> editProfile(@RequestBody User user) {
+        User authUser = userService.getUserFromAuth();
+
+        if (!authUser.getId().equals(user.getId()) && !authUser.getRole().equals(Role.ADMIN)) {
+            return ApiResponseUtils.unauthorized("You can't edit another user's profile");
+        }
+
         if (userService.existUserById(user.getId())) {
             User updatedUser = userService.updateUser(user);
             return ApiResponseUtils.success("User updated", updatedUser.toString());
@@ -136,8 +159,14 @@ public class UserController {
         }
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable("id") long id) {
+        User authUser = userService.getUserFromAuth();
+
+        if (!authUser.getId().equals(id) && !authUser.getRole().equals(Role.ADMIN)) {
+            return ApiResponseUtils.unauthorized("You can't delete another user");
+        }
 
         if (!userService.existUserById(id)) {
             return ApiResponseUtils.notFound("User with id " + id + " not found");

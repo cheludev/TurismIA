@@ -99,6 +99,26 @@ public class TouristService {
         return touristRepository.findById(touristId);
     }
 
+    public void saveRouteForTourist(Tourist tourist, Route route) {
+        if (!tourist.getSavedRoutes().contains(route)) {
+            tourist.getSavedRoutes().add(route);
+            touristRepository.save(tourist);
+        }
+    }
+
+    public void unsaveRouteForTourist(Tourist tourist, Route route) {
+        if (tourist.getSavedRoutes().contains(route)) {
+            tourist.getSavedRoutes().remove(route);
+            touristRepository.save(tourist);
+        }
+    }
+
+    public Optional<Tourist> findByIdWithSavedRoutes(Long touristId) {
+        return touristRepository.findByIdWithSavedRoutes(touristId);
+    }
+
+
+
 
 
     public Tourist getTouristById(Long id) {

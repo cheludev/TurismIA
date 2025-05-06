@@ -1,5 +1,6 @@
 package com.turismea.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,18 +22,22 @@ public class City {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "city", orphanRemoval = true)
     @Column(name = "spots")
+    @JsonIgnore
     private List<Spot> spots;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "city" , orphanRemoval = true)
     @Column(name = "moderators")
+    @JsonIgnore
     private List<Moderator> moderators;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "city", orphanRemoval = true)
     @Column(name = "routes")
+    @JsonIgnore
     private List<Route> routes;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "city", orphanRemoval = true)
     @Column(name = "distance_matrix")
+    @JsonIgnore
     private List<CityDistance> distanceMatrix;
 
     public City(String name, List<Spot> spots, List<Moderator> moderators, List<Route> routes) {

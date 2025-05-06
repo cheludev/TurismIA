@@ -9,6 +9,7 @@ import com.turismea.service.ReportService;
 import com.turismea.service.SpotService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class SpotController {
             return ApiResponseUtils.success("List of spots", spotResponse);
         }
     }
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @GetMapping("/validated/{city}")
     public ResponseEntity<?> listSpots(@PathVariable("city") String city) {
         List<Spot> spots = spotService.getValidatedSpotByCity(city);
@@ -50,7 +52,7 @@ public class SpotController {
         }
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @PutMapping("/{id}/validate")
     public ResponseEntity<?> validateSpot(@PathVariable Long id) {
         Optional<Spot> spotOptional = spotService.findById(id);
@@ -71,6 +73,7 @@ public class SpotController {
         return ApiResponseUtils.success("Spot has been validated", spt);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteSpot(@PathVariable("id") Long id) {
         Optional<Spot> optionalSpot = spotService.findById(id);

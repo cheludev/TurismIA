@@ -15,6 +15,7 @@ public class ApiResponseUtils {
         return ResponseEntity.ok(new ApiResponse<>("success", message));
     }
 
+
     // Created (201)
     public static <T> ResponseEntity<ApiResponse<T>> created(String message, T body) {
         return ResponseEntity.status(HttpStatus.CREATED)

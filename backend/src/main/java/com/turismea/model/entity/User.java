@@ -1,5 +1,6 @@
 package com.turismea.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.turismea.model.enumerations.Province;
 import com.turismea.model.enumerations.Role;
 import jakarta.persistence.*;
@@ -39,6 +40,7 @@ public class User implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Request> request = new ArrayList<>();
 
     @Lob

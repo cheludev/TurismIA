@@ -3,6 +3,7 @@ package com.turismea.service;
 import com.turismea.exception.AlreadyAppliedException;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.entity.Request;
+import com.turismea.model.entity.Route;
 import com.turismea.model.entity.Tourist;
 import com.turismea.model.entity.User;
 import com.turismea.model.enumerations.Province;
@@ -12,6 +13,7 @@ import com.turismea.repository.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,12 +22,14 @@ public class TouristService {
     private final TouristRepository touristRepository;
     private final RequestService requestService;
     private final PasswordEncoder passwordEncoder;
+    private final RouteRepository routeRepository;
 
     public TouristService(TouristRepository touristRepository, RequestService requestService,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, RouteRepository routeRepository) {
         this.touristRepository = touristRepository;
         this.requestService = requestService;
         this.passwordEncoder = passwordEncoder;
+        this.routeRepository = routeRepository;
     }
 
     public Tourist registerTourist(User user) {
@@ -94,4 +98,12 @@ public class TouristService {
     public Optional<Tourist> findById(Long touristId) {
         return touristRepository.findById(touristId);
     }
+
+
+
+    public Tourist getTouristById(Long id) {
+        return touristRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
+
 }

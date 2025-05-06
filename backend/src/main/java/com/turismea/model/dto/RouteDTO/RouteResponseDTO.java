@@ -4,12 +4,15 @@ import com.turismea.model.entity.Route;
 import com.turismea.model.entity.Spot;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Data
+@Setter
+@NoArgsConstructor
 public class RouteResponseDTO {
 
     private Long id;
@@ -20,6 +23,7 @@ public class RouteResponseDTO {
     private Long cityId;
     private Long ownerId;
     private List<Long> spotIds;
+    private boolean draft;
 
     public RouteResponseDTO(Route route) {
         this.id = route.getId();
@@ -34,6 +38,9 @@ public class RouteResponseDTO {
                 .map(Spot::getId)
                 .toList()
                 : List.of();
+        this.draft = true;
 
     }
+
+
 }

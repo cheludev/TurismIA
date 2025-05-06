@@ -1,47 +1,41 @@
 package com.turismea.service;
 
 import com.turismea.exception.*;
+import com.turismea.model.dto.LocationDTO;
 import com.turismea.model.entity.*;
 import com.turismea.repository.RouteRepository;
+import com.turismea.repository.TouristRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RouteService {
     private final RouteRepository routeRepository;
-    private final TouristService touristService;
     private final CityService cityService;
-    private final RouteGeneratorService routeGeneratorService;
+    private final CityDistanceService cityDistanceService;
+    @Autowired
+    private WKTService wktService;
+    @Autowired
+    private TouristRepository touristRepository;
 
 
     public RouteService(RouteRepository routeRepository, TouristService touristService, CityService cityService,
-                        CityDistanceService cityDistanceService, OpenStreetMapService openStreetMapService,
-                        WKTService wktService, RouteGeneratorService routeGeneratorService) {
+                        OpenStreetMapService openStreetMapService, WKTService wktService,
+                        RouteGeneratorService routeGeneratorService,
+                        CityDistanceService cityDistanceService) {
         this.routeRepository = routeRepository;
 
-        this.touristService = touristService;
         this.cityService = cityService;
-        this.routeGeneratorService = routeGeneratorService;
+        this.cityDistanceService = cityDistanceService;
     }
 
 
-    public Route editRoute(Route ogRoute, Route newRoute, Long touristId) throws Exception {
 
-        if(newRoute.getSpots().isEmpty() || ogRoute.getSpots().isEmpty()) {
-            throw new Exception("The route can not has zero spots");
-        }
-
-        if(touristId == null || touristService.findById(touristId).isEmpty()) {
-            throw new UserNotFoundException(touristId);
-        }
-
-        // We have to calc the new route duration of the route
-
-        return routeGeneratorService.createRoute(newRoute);
-    }
     public List<Route> saveRoute(Long touristId, Route route) {
-        Tourist tourist = touristService.findById(touristId)
+        Tourist tourist = touristRepository.findById(touristId)
                 .orElseThrow(() -> new UserNotFoundException(touristId));
 
         route.setOwner(tourist);
@@ -53,7 +47,7 @@ public class RouteService {
 
 
     public List<Route> getSavedRoutes(Long touristId) {
-        Tourist tourist = touristService.findById(touristId)
+        Tourist tourist = touristRepository.findById(touristId)
                 .orElseThrow(() -> new UserNotFoundException(touristId));
         return routeRepository.getRouteByOwner(tourist);
     }
@@ -70,9 +64,8 @@ public class RouteService {
     public void deleteRoute(Long routeId) {
         routeRepository.deleteById(routeId);
     }
-
-    public Route getRouteById(Long routeId) {
-        return routeRepository.findById(routeId)
+    public Route getRouteWithSpotsById(Long routeId) {
+        return routeRepository.findWithSpotsById(routeId)
                 .orElseThrow(() -> new RouteNotFoundException(routeId));
     }
 
@@ -84,8 +77,42 @@ public class RouteService {
         routeRepository.delete(route);
     }
 
-
-    public double calculateRatingFormARoute(List<Spot> spots){
+    public double calculateRatingOfARoute(List<Spot> spots){
+        if (spots == null || spots.isEmpty()) return 0.0;
         return spots.stream().mapToDouble(Spot::getRating).sum()/spots.size();
+    }
+
+
+    public int calculateDurationOfARoute(List<Spot> spots) {
+
+        if (spots.size() < 2) {
+            return spots.get(0).getAverageTime();
+        }
+
+        int duration = 0;
+
+        for (int i = 0; i < spots.size() - 1; i++) {
+            Spot spotA = spots.get(i);
+            Spot spotB = spots.get(i + 1);
+
+            duration += cityDistanceService.getDurationBetween(
+                    new LocationDTO(spotA.getLatitude(), spotA.getLongitude()),
+                    new LocationDTO(spotB.getLatitude(), spotB.getLongitude())
+            );
+
+            duration += spotA.getAverageTime();
+        }
+
+        return duration;
+    }
+
+
+    public Route save(Route route) {
+        return routeRepository.save(route);
+    }
+
+
+    public List<Route> getDraftsOfAnUser(Long id) {
+        return routeRepository.findByOwner_IdAndDraft(id, true);
     }
 }

@@ -93,28 +93,31 @@ public class RouteGeneratorService {
 
     public Route createRoute(Route route) {
         List<Spot> spots = route.getSpots();
-        if (spots == null || spots.size() < 2) {
-            throw new IllegalArgumentException("The route must contain at least two spots.");
-        }
-
         long totalDuration = 0;
 
-        for (int i = 1; i < spots.size(); i++) {
-            Spot previous = spots.get(i - 1);
-            Spot current = spots.get(i);
 
-            // Get the duration between two spots from the database (CityDistance)
-            List<CityDistance> distances = cityDistanceService.getListOfCityDistancesIgnoringOrder(previous, current);
+        if (spots == null || spots.size() < 2) {
+            totalDuration = spots.get(0).getAverageTime();
+        } else {
+            for (int i = 1; i < spots.size(); i++) {
+                Spot previous = spots.get(i - 1);
+                Spot current = spots.get(i);
 
-            if (!distances.isEmpty()) {
-                long travelDuration = distances.get(0).getDuration();
-                totalDuration += travelDuration;
-            } else {
-                System.err.println("⚠️ No CityDistance found between " + previous.getName() + " and " + current.getName());
+                // Get the duration between two spots from the database (CityDistance)
+                List<CityDistance> distances = cityDistanceService.getListOfCityDistancesIgnoringOrder(previous, current);
+
+                if (!distances.isEmpty()) {
+                    totalDuration += cityDistanceService.getDurationBetween(
+                            new LocationDTO(previous.getLatitude(), previous.getLongitude()),
+                            new LocationDTO(current.getLatitude(), current.getLongitude())
+                    );
+                    totalDuration += current.getAverageTime();
+
+                } else {
+                    System.err.println("⚠️ No CityDistance found between " + previous.getName() + " and " + current.getName());
+                }
             }
 
-            // Add the average visiting time of the current spot
-            totalDuration += current.getAverageTime();
         }
 
         route.setDuration(totalDuration);
@@ -221,8 +224,6 @@ public class RouteGeneratorService {
             System.out.println("↩️ Backtracking: removing spot " + removed.getName());
         }
     }
-
-
 
 
     private List<Route> getSortedListOfRoutes(List<Route> listOfRoutes) {

@@ -18,6 +18,9 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private boolean draft = true;
+
     private String name;
 
     @ManyToOne

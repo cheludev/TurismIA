@@ -174,4 +174,9 @@ public class SpotService {
     public boolean exitsById(Long id) {
         return spotRepository.existsById(id);
     }
+
+    public List<Spot> findAllById(List<Long> spotIds) {
+        return spotRepository.findAllById(spotIds);
+    }
+
 }

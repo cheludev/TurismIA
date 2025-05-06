@@ -1,6 +1,10 @@
 package com.turismea.model.api_response;
 
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class ApiResponse<T> {
     private String status;
     private String message;
@@ -16,29 +20,4 @@ public class ApiResponse<T> {
         this(status, message, null);
     }
 
-    // Getters y setters
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public T getBody() {
-        return body;
-    }
-
-    public void setBody(T body) {
-        this.body = body;
-    }
 }

@@ -15,6 +15,8 @@ import java.util.*;
 @Service
 public class RouteGeneratorService {
 
+    private static final int MAX_ROUTES = 100;
+
     private final SpotService spotService;
     private final OrdenationAlgorithimService ordenationAlgorithimService;
     private final CityDistanceService cityDistanceService;
@@ -33,7 +35,7 @@ public class RouteGeneratorService {
 
         if (spots.isEmpty() || last) {
             spots.add(newSpot);
-            System.out.println(last? "⭕⬅\uFE0F Last" : "⭕⬅\uFE0F First" + " spot added" +
+            System.out.println(last? "⭕⬅️ Last" : "⭕⬅️ First" + " spot added" +
                     " | Total route duration: " + route.getDuration() + "s");
             return Mono.empty();
         }
@@ -58,13 +60,21 @@ public class RouteGeneratorService {
 
         String wktPointA = String.format(Locale.US, "POINT(%f %f)", initialPoint.getLongitude(), initialPoint.getLatitude());
         String wktPointB = String.format(Locale.US, "POINT(%f %f)", finalPoint.getLongitude(), finalPoint.getLatitude());
-        double maxRad = spotService.getDistanceBetween(wktPointA, wktPointB);
+//        double maxRad = spotService.getDistanceBetween(wktPointA, wktPointB);
+        double maxRad = 2000.0; // metros
 
         double INITIAL_RADIUS = 10.0;
         initialSpot = getBetterNearestPoint(initialPoint, INITIAL_RADIUS, maxRad);
-        System.out.println("PUNTO INICIAL SELECCIONADO " + initialSpot.getName());
+        if (initialSpot == null) {
+            throw new SpotNotFoundException("No se encontró un punto inicial cercano al punto indicado.");
+        }
+        System.out.println("✅ PUNTO INICIAL SELECCIONADO: " + initialSpot.getName());
+
         finalSpot = getBetterNearestPoint(finalPoint, INITIAL_RADIUS, maxRad);
-        System.out.println("PUNTO Final SELECCIONADO " + finalSpot.getName());
+        if (finalSpot == null) {
+            throw new SpotNotFoundException("No se encontró un punto final cercano al punto indicado.");
+        }
+        System.out.println("✅ PUNTO FINAL SELECCIONADO: " + finalSpot.getName());
 
         List<Route> listOfRoutes = getRoutes(secTime, initialSpot, finalSpot, initialPoint, finalPoint);
 
@@ -124,6 +134,37 @@ public class RouteGeneratorService {
         return route;
     }
 
+    public long calculateTotalRouteDurationFromIds(List<Long> spotIds) {
+        if (spotIds == null || spotIds.isEmpty()) {
+            throw new IllegalArgumentException("The list of spot IDs cannot be null or empty.");
+        }
+
+        List<Spot> spots = spotIds.stream()
+                .map(id -> spotService.findById(id)
+                        .orElseThrow(() -> new SpotNotFoundException("Spot not found with ID: " + id)))
+                .toList();
+
+        long totalDuration = 0;
+
+        for (int i = 0; i < spots.size(); i++) {
+            Spot current = spots.get(i);
+            if (i > 0) {
+                Spot previous = spots.get(i - 1);
+
+                // Calcula la duración de viaje entre dos spots
+                totalDuration += cityDistanceService.getDurationBetween(
+                        new LocationDTO(previous.getLatitude(), previous.getLongitude()),
+                        new LocationDTO(current.getLatitude(), current.getLongitude())
+                );
+            }
+
+            // Añade el tiempo medio de visita del spot actual
+            totalDuration += current.getAverageTime();
+        }
+
+        return totalDuration;
+    }
+
 
     private List<Route> traverseTheSpotGraphToGetRoutes(Spot initialSpot, Spot finalSpot, int time,
                                                         LocationDTO initialPoint, LocationDTO finalPoint) {
@@ -139,6 +180,8 @@ public class RouteGeneratorService {
     private void dfs(Spot current, Spot destiny, Route route, Set<Spot> visited, List<Route> result,
                      int durationMax, LocationDTO initialPoint, LocationDTO finalPoint) {
 
+        if (result.size() >= MAX_ROUTES) return;
+
         if (visited.contains(current)) return;
         if (route.getDuration() > durationMax) return;
 
@@ -147,17 +190,14 @@ public class RouteGeneratorService {
         long originalDuration = route.getDuration();
 
         try {
-            if (route.getSpots().isEmpty()) { //It implies that is the first iteration
-                // Add synthetic initial point only once at the start
+            if (route.getSpots().isEmpty()) {
                 Spot initialSynthetic = spotService.getFinalOrInitialPoint(0, initialPoint);
                 route.getSpots().add(initialSynthetic);
 
-                // Calculate duration from synthetic initial point to first real spot
                 long travelDuration = cityDistanceService.getDurationBetween(initialPoint,
                         new LocationDTO(current.getLatitude(), current.getLongitude()));
-                // Add the spot to the route
                 addSpotToRoute(route, current, travelDuration, current.equals(destiny)).block();
-            } else { //For the rest of iteration
+            } else {
                 Spot previousSpot = route.getSpots().get(route.getSpots().size() - 1);
                 List<CityDistance> distances = cityDistanceService.getListOfCityDistancesIgnoringOrder(previousSpot, current);
                 if (!distances.isEmpty()) {
@@ -185,10 +225,9 @@ public class RouteGeneratorService {
                 );
                 addSpotToRoute(route, finalSynthetic, travelDuration, current.equals(destiny)).block();
 
-                // Final time validation after full route is constructed
                 if (route.getDuration() > durationMax) {
                     System.out.println("⚠️ Skipping final route due to total duration overflow: " + route.getDuration() + "s > " + durationMax + "s");
-                    route.getSpots().remove(route.getSpots().size()-1); // Remove Final Point before backtracking
+                    route.getSpots().remove(route.getSpots().size()-1);
                     route.setDuration(originalDuration);
                     visited.remove(current);
                     return;
@@ -251,7 +290,7 @@ public class RouteGeneratorService {
         }
 
         if (spots.isEmpty()) {
-            return null;
+            throw new SpotNotFoundException("No spot near the start/end points has been found ");
         }
 
         List<Long> durations = spots.stream()

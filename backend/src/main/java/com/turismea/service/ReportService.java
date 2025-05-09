@@ -76,4 +76,8 @@ public class ReportService {
     public void deleteReport(Report report) {
         reportRepository.delete(report);
     }
+
+    public void save(Report report) {
+        reportRepository.save(report);
+    }
 }

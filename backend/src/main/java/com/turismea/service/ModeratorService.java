@@ -89,8 +89,10 @@ public class ModeratorService {
         return true;
     }
 
-
     public Optional<Moderator> findById(Long userId) {
-        return moderatorRepository.findById(userId);
+        return moderatorRepository.findByIdWithCity(userId);
     }
+
+
+
 }

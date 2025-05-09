@@ -24,9 +24,9 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     List<Route> findRouteByOwner_Id(Long ownerId);
 
     List<Route> getRoutesByCity(City city);
+    @Query("SELECT DISTINCT r FROM Route r LEFT JOIN FETCH r.spots WHERE r.owner = :owner AND r.draft = true")
+    List<Route> getSavedDraftRoutesByOwnerFetchSpots(@Param("owner") Tourist owner);
 
-    @Query(value = "SELECT DISTINCT R FROM Route R WHERE R.owner = :owner")
-    List<Route> getRouteByOwner(@Param("owner") Tourist owner);
 
     List<Route> getRoutesByOwner(Tourist tourist);
 
@@ -34,5 +34,13 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     List<Route> findByOwner_IdAndDraft(Long id, boolean draft);
 
     Optional<Route> findByIdAndOwner_Id(Long id, Long id1);
+
+    @Query("SELECT r FROM Route r LEFT JOIN FETCH r.spots WHERE r.owner.id = :userId AND r.draft = true")
+    List<Route> findSavedRoutesByUserId(@Param("userId") Long userId);
+
+    List<Route> findByCityId(Long cityId);
+
+    @Query("SELECT r FROM Route r LEFT JOIN FETCH r.spots WHERE r.city.name = :cityName")
+    List<Route> findByCity_NameIgnoreCase(@Param("cityName") String cityName);
 }
 

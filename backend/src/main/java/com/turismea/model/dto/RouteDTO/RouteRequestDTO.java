@@ -14,4 +14,5 @@ public class RouteRequestDTO {
     private LocationDTO from;
     private LocationDTO to;
     private int maxDuration;
+
 }

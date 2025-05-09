@@ -25,6 +25,8 @@ public interface TouristRepository extends JpaRepository<Tourist, Long> {
     @Query("SELECT t FROM Tourist t LEFT JOIN FETCH t.savedRoutes WHERE t.id = :id")
     Optional<Tourist> findByIdWithSavedRoutes(@Param("id") Long id);
 
+    @Query("SELECT DISTINCT t FROM Tourist t LEFT JOIN FETCH t.savedRoutes")
+    List<Tourist> findAllWithSavedRoutes();
 
 
 }

@@ -5,7 +5,10 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.turismea.exception.UserNotFoundException;
 import com.turismea.model.api_response.ApiResponse;
 import com.turismea.model.api_response.ApiResponseUtils;
+import com.turismea.model.dto.AdminDTO;
 import com.turismea.model.dto.LoginRequest;
+import com.turismea.model.dto.ModeratorDTO.ModeratorDTO;
+import com.turismea.model.dto.TouristDTO.TouristResponseDTO;
 import com.turismea.model.dto.UserDTO;
 import com.turismea.model.entity.*;
 import com.turismea.model.enumerations.Role;
@@ -18,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -47,12 +51,8 @@ public class UserController {
     private RepositoryUserDetailsService repositoryUserDetailsService;
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('FRONTEND') or hasRole('TOURIST') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> getUserById(@PathVariable("id") long idUser) {
-        User authUser = userService.getUserFromAuth();
-
-        if (!authUser.getId().equals(idUser) && !authUser.getRole().equals(Role.ADMIN)) {
-            return ApiResponseUtils.unauthorized("You can't access other user's data");
-        }
 
         Optional<User> userOptional = userService.findUserById(idUser);
         if (userOptional.isPresent()) {
@@ -62,6 +62,7 @@ public class UserController {
             return ApiResponseUtils.notFound("User with id " + idUser + " not found");
         }
     }
+
 
 
     @PostMapping("/signup")
@@ -105,7 +106,6 @@ public class UserController {
             return ApiResponseUtils.unauthorized("Incorrect password");
         }
     }
-
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
 
@@ -116,51 +116,65 @@ public class UserController {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         User user = customUserDetails.getUser();
 
-        Map<String, Object> response = new HashMap<>();
-        UserDTO userDTO = new UserDTO(user);
-
-        response.put("user", userDTO);  
-
         switch (user.getRole()) {
             case TOURIST -> {
                 Tourist tourist = userService.getTourist(user.getId());
-                List<Long> savedRouteIds = tourist.getSavedRoutes().stream()
-                        .map(Route::getId)
-                        .toList();
-                response.put("savedRoutes", savedRouteIds);
+                return ApiResponseUtils.success("Authenticated tourist", new TouristResponseDTO(tourist));
             }
             case MODERATOR -> {
-                var moderator = userService.getModerator(user.getId());
-                response.put("provinceChangesRequest", moderator.getChangeProvinceRequest());
+                Moderator moderator = userService.getModerator(user.getId());
+                return ApiResponseUtils.success("Authenticated moderator", new ModeratorDTO(moderator));
             }
             case ADMIN -> {
-                var admin = userService.getAdmin(user.getId());
-                response.put("requestsToAppliedToChangeTheProvince", admin.getAppliedToChangeTheProvince());
+                Admin admin = userService.getAdmin(user.getId());
+                return ApiResponseUtils.success("Authenticated admin", new AdminDTO(admin));
+            }
+            default -> {
+                return ApiResponseUtils.internalServerError("Unknown role");
             }
         }
+    }
 
-        return ApiResponseUtils.success("Authenticated user data", response);
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ApiResponseUtils.unauthorized("No authenticated user");
+        }
+
+        return ApiResponseUtils.success("Logout successful. Please remove the token on the client side.");
     }
 
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> editProfile(@RequestBody User user) {
+    @PreAuthorize("hasRole('TOURIST') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> editProfile(@PathVariable("id") long id, @RequestBody User user) {
         User authUser = userService.getUserFromAuth();
 
-        if (!authUser.getId().equals(user.getId()) && !authUser.getRole().equals(Role.ADMIN)) {
+        if (!authUser.getId().equals(id) && !authUser.getRole().equals(Role.ADMIN)) {
             return ApiResponseUtils.unauthorized("You can't edit another user's profile");
         }
 
-        if (userService.existUserById(user.getId())) {
-            User updatedUser = userService.updateUser(user);
-            return ApiResponseUtils.success("User updated", updatedUser.toString());
-        } else {
-            return ApiResponseUtils.notFound("User not found");
+        authUser.setFirstName(user.getFirstName());
+        authUser.setLastName(user.getLastName());
+        authUser.setEmail(user.getEmail());
+        authUser.setPhoto(user.getPhoto());
+
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            authUser.setPassword(user.getPassword());
         }
+
+        User updatedUser = userService.updateUser(authUser);
+        return ApiResponseUtils.success("User updated", updatedUser.toString());
     }
 
 
+
+
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TOURIST') or hasRole('MODERATOR') or hasRole('ADMIN')")
+
     public ResponseEntity<?> deleteUser(@PathVariable("id") long id) {
         User authUser = userService.getUserFromAuth();
 

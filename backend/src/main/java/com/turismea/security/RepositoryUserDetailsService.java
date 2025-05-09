@@ -25,10 +25,8 @@ public class RepositoryUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        List<GrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-
-        return new CustomUserDetails(user, roles);
+        return new CustomUserDetails(user);
     }
+
 
 }

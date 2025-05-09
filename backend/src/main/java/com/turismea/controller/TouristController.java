@@ -7,6 +7,7 @@ import com.turismea.model.dto.RouteDTO.RouteListDTO;
 import com.turismea.model.dto.RouteDTO.RouteResponseDTO;
 import com.turismea.model.dto.TouristDTO.TouristResponseDTO;
 import com.turismea.model.entity.Route;
+import com.turismea.model.entity.Spot;
 import com.turismea.model.entity.Tourist;
 import com.turismea.model.entity.User;
 import com.turismea.model.enumerations.Role;
@@ -56,7 +57,7 @@ public class TouristController {
     }
 
     @GetMapping("/{userId}/drafts")
-    public ResponseEntity<?> getSavedRoutes(@PathVariable("userId") Long userId) {
+    public ResponseEntity<?> getDraftsRoutes(@PathVariable("userId") Long userId) {
         User authUser = userService.getUserFromAuth();
         if (!authUser.getId().equals(userId)) {
             return ApiResponseUtils.unauthorized("You can't access other user's data");
@@ -79,7 +80,7 @@ public class TouristController {
 
 
     @PostMapping("/routes/{routeId}/save")
-    public ResponseEntity<?> saveRouteForUser(@PathVariable Long routeId) {
+    public ResponseEntity<?> saveRouteForUser(@PathVariable("routeId") Long routeId) {
         User authUser = userService.getUserFromAuth();
 
         Route route = routeService.getRouteWithSpotsById(routeId);
@@ -98,5 +99,71 @@ public class TouristController {
 
         return ApiResponseUtils.success("Route " + routeId + " saved successfully for user " + authUser.getUsername());
     }
+
+    @GetMapping("/{id}/saved")
+    public ResponseEntity<?> getSavedRoutes(@PathVariable("id") Long userId) {
+        User authUser = userService.getUserFromAuth();
+        if (!authUser.getId().equals(userId)) {
+            return ApiResponseUtils.unauthorized("You can't access other user's data");
+        }
+        List<Route> saved = routeService.getSavedRoutes(userId);
+
+        if (saved.isEmpty()) {
+            return ApiResponseUtils.notFound("No draft routes found for user " + userId);
+        }
+
+        List<RouteListDTO> responseDTO = saved.stream()
+                .map(RouteListDTO::new)
+                .toList();
+
+        return ApiResponseUtils.success(
+                "List of saved routes for user " + userId,
+                responseDTO
+        );
+    }
+    @DeleteMapping("/{userId}/routes/{routeId}")
+    public ResponseEntity<?> deleteRoute(@PathVariable("userId") Long userId, @PathVariable("routeId") Long routeId) {
+
+        User authUser = userService.getUserFromAuth();
+        if (!authUser.getId().equals(userId)) {
+            return ApiResponseUtils.unauthorized("You can't delete another user's routes");
+        }
+
+        Route route = routeService.getRouteWithSpotsById(routeId);
+
+        boolean isOwner = route.getOwner().getId().equals(userId);
+
+        if (isOwner) {
+
+            List<Tourist> allTourists = touristService.findAllTourists();
+
+            for (Tourist tourist : allTourists) {
+                if (tourist.getSavedRoutes().contains(route)) {
+                    tourist.getSavedRoutes().remove(route);
+                    touristService.save(tourist);
+                }
+            }
+
+            routeService.delete(route);
+
+            return ApiResponseUtils.success("Route " + routeId + " deleted successfully from the platform");
+
+        } else {
+            Tourist tourist = touristService.findByIdWithSavedRoutes(userId)
+                    .orElseThrow(() -> new UserNotFoundException("Tourist user not found"));
+
+            if (tourist.getSavedRoutes().contains(route)) {
+                tourist.getSavedRoutes().remove(route);
+                touristService.save(tourist);
+
+                return ApiResponseUtils.success("Route " + routeId + " removed from your saved routes");
+            } else {
+                return ApiResponseUtils.notFound("Route " + routeId + " is not in your saved routes");
+            }
+        }
+    }
+
+
+
 
 }

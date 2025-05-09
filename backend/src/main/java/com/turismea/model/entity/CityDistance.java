@@ -38,7 +38,11 @@ public class CityDistance {
     @Column(nullable = false)
     private long duration;
 
-    public CityDistance(City city, Spot spotA, Spot spotB, long distance, long duration) {
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String geometryJson;
+
+    public CityDistance(City city, Spot spotA, Spot spotB, long distance, long duration, String geometryJson) {
         if (spotA.getId() > spotB.getId()) {
             Spot temp = spotA;
             spotA = spotB;
@@ -50,6 +54,7 @@ public class CityDistance {
         this.spotB = spotB;
         this.distance = distance;
         this.duration = duration;
+        this.geometryJson = geometryJson;
     }
 
 }

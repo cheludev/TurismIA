@@ -23,13 +23,15 @@ public class TouristService {
     private final RequestService requestService;
     private final PasswordEncoder passwordEncoder;
     private final RouteRepository routeRepository;
+    private final UserRepository userRepository;
 
     public TouristService(TouristRepository touristRepository, RequestService requestService,
-                          PasswordEncoder passwordEncoder, RouteRepository routeRepository) {
+                          PasswordEncoder passwordEncoder, RouteRepository routeRepository, UserRepository userRepository) {
         this.touristRepository = touristRepository;
         this.requestService = requestService;
         this.passwordEncoder = passwordEncoder;
         this.routeRepository = routeRepository;
+        this.userRepository = userRepository;
     }
 
     public Tourist registerTourist(User user) {
@@ -118,7 +120,13 @@ public class TouristService {
     }
 
 
+    public List<Tourist> findAllTourists() {
+        return touristRepository.findAllWithSavedRoutes();
+    }
 
+    public Boolean existUser(Long id){
+        return userRepository.existsUserById(id);
+    }
 
 
     public Tourist getTouristById(Long id) {

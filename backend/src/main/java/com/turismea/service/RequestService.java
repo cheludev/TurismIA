@@ -11,6 +11,8 @@ import com.turismea.repository.RequestRepository;
 import com.turismea.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RequestService {
 
@@ -26,6 +28,13 @@ public class RequestService {
             return requestRepository.save(new Request(user, type, reasonsOfTheRequest, province));
         }
         return null;
+    }
+    public Request getRequestById(Long id) {
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new RequestNotFoundException(id));
+    }
+    public List<Request> getAllRequests() {
+        return requestRepository.findAll();
     }
 
     public void manageRequest(Long requestId, RequestStatus requestStatus, Province province) {

@@ -1,1 +1,38 @@
-backend/src/main/resources/application.properties
+# General
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/ios/
+**/android/
+**/web/
+**/windows/
+**/macos/
+**/linux/
+
+# Ignorar todo el frontend excepto lib/
+frontend/turismia_app/*
+!frontend/turismia_app/lib/
+!frontend/turismia_app/lib/**
+
+# Ignorar todo el backend excepto java/com/turismea
+backend/*
+!backend/src/
+backend/src/*
+!backend/src/main/
+backend/src/main/*
+!backend/src/main/java/
+backend/src/main/java/*
+!backend/src/main/java/com/
+backend/src/main/java/com/*
+!backend/src/main/java/com/turismea/
+backend/src/main/java/com/turismea/**

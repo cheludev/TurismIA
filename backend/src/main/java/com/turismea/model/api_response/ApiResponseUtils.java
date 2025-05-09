@@ -22,11 +22,21 @@ public class ApiResponseUtils {
                 .body(new ApiResponse<>("created", message, body));
     }
 
-    // Error 400 (Bad Request)
-    public static ResponseEntity<ApiResponse<Void>> badRequest(String message) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse<>("error", message));
+
+    public static <T> ResponseEntity<ApiResponse<T>> badRequest(String message) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ApiResponse<>(HttpStatus.BAD_REQUEST.value() + "", message, null));
     }
+
+
+
+    // Conflict genérico
+    public static <T> ResponseEntity<ApiResponse<T>> conflict(String message, T body) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiResponse<>("error", message, body));
+    }
+
 
     // Error 401 (Unauthorized)
     public static ResponseEntity<ApiResponse<Void>> unauthorized(String message) {

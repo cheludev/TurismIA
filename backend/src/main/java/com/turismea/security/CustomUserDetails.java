@@ -7,20 +7,25 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+import com.turismea.model.entity.User;
+import lombok.Getter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+
+@Getter
 public class CustomUserDetails implements UserDetails {
 
-    @Getter
     private final User user;
-    private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(User user) {
         this.user = user;
-        this.authorities = authorities;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return user.getAuthorities();
     }
 
     @Override

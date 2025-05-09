@@ -29,6 +29,7 @@ public class UserTypeCreator {
             case TOURIST -> new Tourist(user);
             case MODERATOR -> new Moderator(user);
             case ADMIN -> new Admin(user);
+            default -> null;
         };
     }
 
@@ -49,6 +50,7 @@ public class UserTypeCreator {
                     throw new IllegalArgumentException("User must be an Admin");
                 yield adminRepository.save(admin);
             }
+            default -> null;
         };
     }
 

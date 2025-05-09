@@ -15,6 +15,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     @Query(value = "SELECT r FROM Request r WHERE r.type = :type")
     List<Request> getRequestByType(@Param("type")RequestType type);
 
-
     boolean existsByUserAndType(User user, RequestType type);
 }

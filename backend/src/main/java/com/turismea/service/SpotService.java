@@ -7,6 +7,7 @@ import com.turismea.model.dto.PlacesDTO.GooglePlacesResponse;
 import com.turismea.model.dto.PlacesDTO.Place;
 import com.turismea.model.entity.City;
 import com.turismea.model.entity.Spot;
+import com.turismea.repository.CityRepository;
 import com.turismea.repository.SpotRepository;
 import jakarta.transaction.Transactional;
 import org.locationtech.jts.geom.*;
@@ -26,11 +27,13 @@ public class SpotService {
     private final SpotRepository spotRepository;
     private final GoogleSpotService googleSpotService;
     private final CityService cityService;
+    private final CityRepository cityRepository;
 
-    public SpotService(SpotRepository spotRepository, GoogleSpotService googleSpotService, CityService cityService) {
+    public SpotService(SpotRepository spotRepository, GoogleSpotService googleSpotService, CityService cityService, CityRepository cityRepository) {
         this.spotRepository = spotRepository;
         this.googleSpotService = googleSpotService;
         this.cityService = cityService;
+        this.cityRepository = cityRepository;
     }
 
     @Transactional
@@ -40,6 +43,19 @@ public class SpotService {
 
         if (!spot.isValidated()) {
             spot.setValidated(true);
+        }
+    }
+
+    public List<Spot> getSpotsByCity(City city) {
+        return spotRepository.findByCity(city);
+    }
+
+    public List<Spot> getSpotsByCityName(String cityName) {
+        Optional<City> city = cityRepository.findByName(cityName);
+        if(city.isPresent()){
+            return spotRepository.findByCity(city.get());
+        } else {
+            return new ArrayList<>();
         }
     }
 

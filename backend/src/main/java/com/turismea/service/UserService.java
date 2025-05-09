@@ -97,25 +97,15 @@ public class UserService {
 
     @Transactional
     public User updateUser(User user) {
-        if(user.getUsername() == null || user.getPassword() == null){
+        if (user.getUsername() == null) {
             throw new UserNotFoundException(user.getId());
         }
 
-        if (!userRepository.existsById(user.getId())) {
-            throw new UserNotFoundException(user.getId());
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        User existing = userRepository.findById(user.getId()).orElseThrow();
-
-        existing.setEmail(user.getEmail());
-        existing.setUsername(user.getUsername());
-        existing.setFirstName(user.getFirstName());
-        existing.setLastName(user.getLastName());
-        existing.setProvince(user.getProvince());
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userRepository.save(existing);
+        return userRepository.save(user);
     }
 
 
@@ -133,6 +123,11 @@ public class UserService {
 
     public boolean checkPasswd(String encodedPasswd, String rawPassword) {
         return passwordEncoder.matches(rawPassword, encodedPasswd);
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public boolean existsUserByUsername(String username) {

@@ -27,7 +27,7 @@ public class CityController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
-    @PostMapping("/new")
+    @PostMapping("/")
     public ResponseEntity<?> createCity(@Valid @RequestBody CityDTO newCityDTO) {
         Optional<City> existingCityOpt = cityService.getCityByName(newCityDTO.getName());
 

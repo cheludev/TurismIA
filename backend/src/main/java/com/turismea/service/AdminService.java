@@ -2,6 +2,7 @@ package com.turismea.service;
 
 import com.turismea.model.entity.Admin;
 import com.turismea.model.entity.User;
+import com.turismea.model.enumerations.Role;
 import com.turismea.repository.AdminRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,11 +12,9 @@ import java.util.Optional;
 @Service
 public class AdminService {
     private final AdminRepository adminRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public AdminService(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
+    public AdminService(AdminRepository adminRepository) {
         this.adminRepository = adminRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public Admin registerAdmin(User user){
@@ -25,9 +24,9 @@ public class AdminService {
 
         Admin admin = new Admin();
         admin.setUsername(user.getUsername());
-        admin.setPassword(passwordEncoder.encode(user.getPassword()));
+        admin.setPassword(user.getPassword());
         admin.setEmail(user.getEmail());
-
+        admin.setRole(Role.ADMIN);
         return adminRepository.save(admin);
     }
 
